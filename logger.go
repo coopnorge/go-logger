@@ -1,113 +1,132 @@
 package logger
 
 import (
+	"io"
 	"os"
-	"sync"
-)
+	"time"
 
-var (
-	logOnce     sync.Once
-	errOnce     sync.Once
-	logInstance *Logger
-	errInstance *Logger
+	"github.com/sirupsen/logrus"
 )
-
-// StructuredLogger is an interface representing our logger
-type StructuredLogger interface {
-	LogWithFields(fields Fields) Entry
-	LogPrint(args ...interface{})
-	LogError(args ...interface{})
-	LogTracef(format string, args ...interface{})
-	LogDebugf(format string, args ...interface{})
-	LogInfof(format string, args ...interface{})
-	LogPrintf(format string, args ...interface{})
-	LogWarnf(format string, args ...interface{})
-	LogErrorf(format string, args ...interface{})
-	LogFatalf(format string, args ...interface{})
-	LogPanicf(format string, args ...interface{})
-}
 
 // Fields type, used to pass to `WithFields`.
 type Fields map[string]interface{}
 
+type NowFunc func() time.Time
+
 // Logger is our logger with the needed structured logger we use
 type Logger struct {
-	structuredLogger StructuredLogger
+	logrusLogger *logrus.Logger
+	now          NowFunc
+	output       io.Writer
+	level        Level
 }
 
-// Err returns a single isntance of a Logger using the Singleton Pattern with Gos sync.Once
-func err() *Logger {
-	errOnce.Do(func() {
-		errInstance = &Logger{
-			structuredLogger: Logrus(os.Stderr),
-		}
-	})
-
-	return errInstance
+func (l *Logger) applyOptions(opts ...LoggerOption) {
+	for _, opt := range opts {
+		opt.Apply(l)
+	}
+	l.logrusLogger.SetOutput(l.output)
+	l.logrusLogger.SetLevel(mapLevelToLogrusLevel(l.level))
 }
 
-// Log returns a single instance of a Logger using the Singleton Pattern with Gos sync.Once
-func log() *Logger {
-	logOnce.Do(func() {
-		logInstance = &Logger{
-			structuredLogger: Logrus(os.Stdout),
-		}
-	})
+func New(opts ...LoggerOption) *Logger {
+	logrusLogger := logrus.New()
+	logrusLogger.SetFormatter(&logrus.JSONFormatter{})
+	logger := &Logger{
+		logrusLogger: logrusLogger,
+		now:          NowFunc(time.Now),
+		output:       os.Stdout,
+		level:        LevelWarn,
+	}
+	logger.applyOptions(opts...)
+	return logger
+}
 
-	return logInstance
+func (l *Logger) entry() Entry {
+	return l.logrusLogger.WithTime(l.now())
 }
 
 // WithFields forwards a logging call with fields
-func (*Logger) WithFields(fields Fields) Entry {
-	return log().structuredLogger.LogWithFields(fields)
+func (logger *Logger) WithFields(fields Fields) Entry {
+	return logger.logrusLogger.WithTime(logger.now()).WithFields(logrus.Fields(fields))
 }
 
 // Print forwards a standard print logging call
-func (*Logger) Print(args ...interface{}) {
-	log().structuredLogger.LogPrint(args...)
-}
-
-// Error forwards an error logging call
-func (*Logger) Error(args ...interface{}) {
-	err().structuredLogger.LogError(args...)
-}
-
-// Tracef forwards a tracing logging call
-func (*Logger) Tracef(format string, args ...interface{}) {
-	log().structuredLogger.LogTracef(format, args...)
-}
-
-// Debugf forwards a debugging logging call
-func (*Logger) Debugf(format string, args ...interface{}) {
-	log().structuredLogger.LogDebugf(format, args...)
-}
-
-// Infof forwards a logging call in the (format, args) format
-func (*Logger) Infof(format string, args ...interface{}) {
-	log().structuredLogger.LogInfof(format, args...)
+func (logger *Logger) Print(args ...interface{}) {
+	logger.entry().Print(args...)
 }
 
 // Printf forwards a standard printf logging call
-func (*Logger) Printf(format string, args ...interface{}) {
-	log().structuredLogger.LogPrintf(format, args...)
+func (logger *Logger) Printf(format string, args ...interface{}) {
+	logger.entry().Printf(format, args...)
 }
 
-// Warnf forwards a warning logging call
-func (*Logger) Warnf(format string, args ...interface{}) {
-	err().structuredLogger.LogWarnf(format, args...)
+// Infof forwards a logging call in the (format, args) format
+func (logger *Logger) Info(args ...interface{}) {
+	logger.entry().Info(args...)
+}
+
+// Infof forwards a logging call in the (format, args) format
+func (logger *Logger) Infof(format string, args ...interface{}) {
+	logger.entry().Infof(format, args...)
+}
+
+// Error forwards an error logging call
+func (logger *Logger) Error(args ...interface{}) {
+	logger.entry().Error(args...)
 }
 
 // Errorf forwards an error logging call
-func (*Logger) Errorf(format string, args ...interface{}) {
-	err().structuredLogger.LogErrorf(format, args...)
+func (logger *Logger) Errorf(format string, args ...interface{}) {
+	logger.entry().Errorf(format, args...)
+}
+
+// Trace forwards a tracing logging call
+func (logger *Logger) Trace(args ...interface{}) {
+	logger.entry().Trace(args...)
+}
+
+// Tracef forwards a tracing logging call
+func (logger *Logger) Tracef(format string, args ...interface{}) {
+	logger.entry().Tracef(format, args...)
+}
+
+// Debug forwards a debugging logging call
+func (logger *Logger) Debug(args ...interface{}) {
+	logger.entry().Debug(args...)
+}
+
+// Debugf forwards a debugging logging call
+func (logger *Logger) Debugf(format string, args ...interface{}) {
+	logger.entry().Debugf(format, args...)
+}
+
+// Warn forwards a warning logging call
+func (logger *Logger) Warn(args ...interface{}) {
+	logger.entry().Warn(args...)
+}
+
+// Warnf forwards a warning logging call
+func (logger *Logger) Warnf(format string, args ...interface{}) {
+	logger.entry().Warnf(format, args...)
+}
+
+// Fatal forwards a fatal logging call
+func (logger *Logger) Fatal(args ...interface{}) {
+	logger.entry().Fatal(args...)
 }
 
 // Fatalf forwards a fatal logging call
-func (*Logger) Fatalf(format string, args ...interface{}) {
-	err().structuredLogger.LogFatalf(format, args...)
+func (logger *Logger) Fatalf(format string, args ...interface{}) {
+	logger.entry().Fatalf(format, args...)
+}
+
+// Panic forwards a panic logging call
+func (logger *Logger) Panic(args ...interface{}) {
+	logger.entry().Panic(args...)
 }
 
 // Panicf forwards a panic logging call
-func (*Logger) Panicf(format string, args ...interface{}) {
-	err().structuredLogger.LogPanicf(format, args...)
+func (logger *Logger) Panicf(format string, args ...interface{}) {
+	logger.entry().Panicf(format, args...)
 }
