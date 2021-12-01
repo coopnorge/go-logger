@@ -56,8 +56,8 @@ toolchain:
 toolchain-update: go_get_flags+=-u
 toolchain-update: toolchain
 
-.PHONY: init
-init:
+.PHONY: fetch-deps
+fetch-deps:
 	go mod vendor
 
 .PHONY: validate-static
@@ -85,3 +85,4 @@ validate-dynamic: test
 
 .PHONY: validate
 validate: validate-static validate-dynamic
+
