@@ -31,13 +31,9 @@ func TestLogLevels(t *testing.T) {
 		expectedLogLevel string
 	}
 	buf := &bytes.Buffer{}
-	testLogger := New(WithOutput(buf), WithLevel(LevelTrace))
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
 	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
 	testCases := map[string]testCase{
-		"logger.Print() should log with level info": {
-			logFunc:          testLogger.Print,
-			expectedLogLevel: "info",
-		},
 		"logger.Info() should log with level info": {
 			logFunc:          testLogger.Info,
 			expectedLogLevel: "info",
@@ -45,10 +41,6 @@ func TestLogLevels(t *testing.T) {
 		"logger.Error() should log with level error": {
 			logFunc:          testLogger.Error,
 			expectedLogLevel: "error",
-		},
-		"logger.Trace() should log with level trace": {
-			logFunc:          testLogger.Trace,
-			expectedLogLevel: "trace",
 		},
 		"logger.Debug() should log with level debug": {
 			logFunc:          testLogger.Debug,
@@ -77,13 +69,9 @@ func TestLogLevelsInFormatFuncs(t *testing.T) {
 		expectedLogLevel string
 	}
 	buf := &bytes.Buffer{}
-	testLogger := New(WithOutput(buf), WithLevel(LevelTrace))
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
 	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
 	testCases := map[string]testCase{
-		"logger.Printf() should log with level info": {
-			logFunc:          testLogger.Printf,
-			expectedLogLevel: "info",
-		},
 		"logger.Infof() should log with level info": {
 			logFunc:          testLogger.Infof,
 			expectedLogLevel: "info",
@@ -91,10 +79,6 @@ func TestLogLevelsInFormatFuncs(t *testing.T) {
 		"logger.Errorf() should log with level error": {
 			logFunc:          testLogger.Errorf,
 			expectedLogLevel: "error",
-		},
-		"logger.Tracef() should log with level trace": {
-			logFunc:          testLogger.Tracef,
-			expectedLogLevel: "trace",
 		},
 		"logger.Debugf() should log with level debug": {
 			logFunc:          testLogger.Debugf,
@@ -133,14 +117,10 @@ func GlobalLoggerLogLevels(t *testing.T) {
 		ConfigureGlobalLogger(WithOutput(oldOutput), WithLevel(oldLevel))
 		globalLogger.logrusLogger.ExitFunc = oldExitFunc
 	}()
-	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelTrace))
+	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelDebug))
 	globalLogger.logrusLogger.ExitFunc = func(int) {}
 
 	testCases := map[string]testCase{
-		"Print() should log with level info": {
-			logFunc:          Print,
-			expectedLogLevel: "info",
-		},
 		"Info() should log with level info": {
 			logFunc:          Info,
 			expectedLogLevel: "info",
@@ -148,10 +128,6 @@ func GlobalLoggerLogLevels(t *testing.T) {
 		"Error() should log with level error": {
 			logFunc:          Error,
 			expectedLogLevel: "error",
-		},
-		"Trace() should log with level trace": {
-			logFunc:          Trace,
-			expectedLogLevel: "trace",
 		},
 		"Debug() should log with level debug": {
 			logFunc:          Debug,
@@ -190,14 +166,10 @@ func GlobalLoggerLogLevelsInFormatFuncs(t *testing.T) {
 		ConfigureGlobalLogger(WithOutput(oldOutput), WithLevel(oldLevel))
 		globalLogger.logrusLogger.ExitFunc = oldExitFunc
 	}()
-	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelTrace))
+	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelDebug))
 	globalLogger.logrusLogger.ExitFunc = func(int) {}
 
 	testCases := map[string]testCase{
-		"Print() should log with level info": {
-			logFunc:          Printf,
-			expectedLogLevel: "info",
-		},
 		"Info() should log with level info": {
 			logFunc:          Infof,
 			expectedLogLevel: "info",
@@ -205,10 +177,6 @@ func GlobalLoggerLogLevelsInFormatFuncs(t *testing.T) {
 		"Error() should log with level error": {
 			logFunc:          Errorf,
 			expectedLogLevel: "error",
-		},
-		"Trace() should log with level trace": {
-			logFunc:          Tracef,
-			expectedLogLevel: "trace",
 		},
 		"Debug() should log with level debug": {
 			logFunc:          Debugf,
@@ -263,7 +231,7 @@ func TestLoggingCustomFields(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			buf := &bytes.Buffer{}
-			logger := New(WithLevel(LevelTrace), WithOutput(buf))
+			logger := New(WithLevel(LevelDebug), WithOutput(buf))
 			logger.WithFields(Fields{
 				"customField": tc.customFieldValue,
 			}).Warnf("blabla")
@@ -297,57 +265,39 @@ func wasLogged(t *testing.T, logReader io.Reader) bool {
 	return !(err == io.EOF || len(bytes) == 0)
 }
 
-func TestSettingLogLeve(t *testing.T) {
+func TestSettingLogLevel(t *testing.T) {
 	type testCase struct {
 		logLevel             Level
 		expectedLoggedLevels []Level
 	}
 
 	testCases := map[string]testCase{
-		"log panic": {
-			logLevel:             LevelPanic,
-			expectedLoggedLevels: []Level{LevelPanic},
-		},
 		"log fatal and above": {
 			logLevel:             LevelFatal,
-			expectedLoggedLevels: []Level{LevelFatal, LevelPanic},
+			expectedLoggedLevels: []Level{LevelFatal},
 		},
 		"log error and above": {
 			logLevel:             LevelError,
-			expectedLoggedLevels: []Level{LevelError, LevelFatal, LevelPanic},
+			expectedLoggedLevels: []Level{LevelError, LevelFatal},
 		},
 		"log warn and above": {
 			logLevel:             LevelWarn,
-			expectedLoggedLevels: []Level{LevelWarn, LevelError, LevelFatal, LevelPanic},
+			expectedLoggedLevels: []Level{LevelWarn, LevelError, LevelFatal},
 		},
 		"log info and above": {
 			logLevel:             LevelInfo,
-			expectedLoggedLevels: []Level{LevelInfo, LevelWarn, LevelError, LevelFatal, LevelPanic},
+			expectedLoggedLevels: []Level{LevelInfo, LevelWarn, LevelError, LevelFatal},
 		},
 		"log debug and above": {
 			logLevel:             LevelDebug,
-			expectedLoggedLevels: []Level{LevelDebug, LevelInfo, LevelWarn, LevelError, LevelFatal, LevelPanic},
-		},
-		"log trace and above": {
-			logLevel:             LevelTrace,
-			expectedLoggedLevels: []Level{LevelTrace, LevelDebug, LevelInfo, LevelWarn, LevelError, LevelFatal, LevelPanic},
+			expectedLoggedLevels: []Level{LevelDebug, LevelInfo, LevelWarn, LevelError, LevelFatal},
 		},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
-			defer func() {
-				if recover() == nil {
-					t.Fatalf(".Panic() did not panic")
-				}
-			}()
 			buf := &bytes.Buffer{}
 			logger := New(WithOutput(buf), WithLevel(tc.logLevel))
 			logger.logrusLogger.ExitFunc = func(int) {}
-
-			logger.Trace("trace")
-			if contains(tc.expectedLoggedLevels, LevelTrace) != wasLogged(t, buf) {
-				t.Fatalf("trace level was incorrectly filtered")
-			}
 
 			logger.Debug("debug")
 			if contains(tc.expectedLoggedLevels, LevelDebug) != wasLogged(t, buf) {
@@ -373,12 +323,6 @@ func TestSettingLogLeve(t *testing.T) {
 			if contains(tc.expectedLoggedLevels, LevelFatal) != wasLogged(t, buf) {
 				t.Fatalf("fatal level was incorrectly filtered")
 			}
-
-			logger.Panic("panic")
-			if contains(tc.expectedLoggedLevels, LevelPanic) != wasLogged(t, buf) {
-				t.Fatalf("panic level was incorrectly filtered")
-			}
-
 		})
 	}
 }

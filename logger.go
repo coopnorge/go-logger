@@ -51,16 +51,6 @@ func (logger *Logger) WithFields(fields Fields) Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(logrus.Fields(fields))
 }
 
-// Print forwards a standard print logging call
-func (logger *Logger) Print(args ...interface{}) {
-	logger.entry().Print(args...)
-}
-
-// Printf forwards a standard printf logging call
-func (logger *Logger) Printf(format string, args ...interface{}) {
-	logger.entry().Printf(format, args...)
-}
-
 // Infof forwards a logging call in the (format, args) format
 func (logger *Logger) Info(args ...interface{}) {
 	logger.entry().Info(args...)
@@ -79,16 +69,6 @@ func (logger *Logger) Error(args ...interface{}) {
 // Errorf forwards an error logging call
 func (logger *Logger) Errorf(format string, args ...interface{}) {
 	logger.entry().Errorf(format, args...)
-}
-
-// Trace forwards a tracing logging call
-func (logger *Logger) Trace(args ...interface{}) {
-	logger.entry().Trace(args...)
-}
-
-// Tracef forwards a tracing logging call
-func (logger *Logger) Tracef(format string, args ...interface{}) {
-	logger.entry().Tracef(format, args...)
 }
 
 // Debug forwards a debugging logging call
@@ -119,14 +99,4 @@ func (logger *Logger) Fatal(args ...interface{}) {
 // Fatalf forwards a fatal logging call
 func (logger *Logger) Fatalf(format string, args ...interface{}) {
 	logger.entry().Fatalf(format, args...)
-}
-
-// Panic forwards a panic logging call
-func (logger *Logger) Panic(args ...interface{}) {
-	logger.entry().Panic(args...)
-}
-
-// Panicf forwards a panic logging call
-func (logger *Logger) Panicf(format string, args ...interface{}) {
-	logger.entry().Panicf(format, args...)
 }

@@ -5,10 +5,8 @@ import "github.com/sirupsen/logrus"
 type Level uint8
 
 const (
-	// LevelPanic is the highest log level, intended for unrecoverable errors that make the service unsuable. After logging, the app will be shut down.
-	LevelPanic Level = iota
-	// LevelFatal is to be used to log predictable errors that make the service unsuable, eg misconfiguration. After logging, the app will be shut down. This is true even if log level is set to Panic.
-	LevelFatal
+	// LevelFatal is to be used to log predictable errors that make the service unsuable, eg misconfiguration. After logging, the app will be shut down.
+	LevelFatal = iota
 	// LevelError  isto be used for recoverable errors that limit the service's functionality, eg timeouts.
 	LevelError
 	// LevelWarn is to be used for non-critical errors that may require some attention.
@@ -17,10 +15,21 @@ const (
 	LevelInfo
 	// LevelDebug should only be used in dev/test environments.
 	LevelDebug
-	// LevelTrace is to be used to log minute details. Should follow the same rules as LevelDebug.
-	LevelTrace
 )
 
 func mapLevelToLogrusLevel(l Level) logrus.Level {
-	return logrus.Level(l)
+	switch l {
+	case LevelFatal:
+		return logrus.FatalLevel
+	case LevelError:
+		return logrus.ErrorLevel
+	case LevelWarn:
+		return logrus.WarnLevel
+	case LevelInfo:
+		return logrus.InfoLevel
+	case LevelDebug:
+		return logrus.DebugLevel
+	}
+	// should never get here
+	return logrus.DebugLevel
 }
