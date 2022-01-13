@@ -3,309 +3,326 @@ package logger
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
-	"net/url"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"strings"
 	"testing"
 )
 
-var testBuffer bytes.Buffer
-var testTable = []struct {
-	name   string
-	msg    string
-	fields Fields
-}{
-	{
-		"Test 0 - normal message, testfield",
-		"Test message number1",
-		Fields{
-			"testField": "127.0.0.1",
+func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expectedValue interface{}) {
+	log := make(map[string]interface{})
+	err := json.NewDecoder(logReader).Decode(&log)
+	if err != nil {
+		t.Fatalf("cannot decode log entry: %v", err)
+	}
+	v, ok := log[key]
+	if !ok {
+		t.Fatalf("no value found for key %v", key)
+	}
+	if v != expectedValue {
+		t.Fatalf("expected log[%v] to have value: %v, got: %v", key, expectedValue, v)
+	}
+}
+
+func TestLogLevels(t *testing.T) {
+	type testCase struct {
+		logFunc          func(args ...interface{})
+		expectedLogLevel string
+	}
+	buf := &bytes.Buffer{}
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
+	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
+	testCases := map[string]testCase{
+		"logger.Info() should log with level info": {
+			logFunc:          testLogger.Info,
+			expectedLogLevel: "info",
 		},
-	},
-	{
-		"Test 1 - number message, no testfield",
-		"123",
-		Fields{},
-	},
-	{
-		"Test 2 - empty message, no testfield",
-		"",
-		Fields{},
-	},
-}
-
-func LogAndAssertJSON(t *testing.T, log func(*LogrusFacade), assertions func(fields Fields)) {
-	fields := make(map[string]interface{})
-
-	testBuffer.Reset()
-
-	logger := Logrus(&testBuffer)
-
-	log(logger)
-
-	if err := json.Unmarshal(testBuffer.Bytes(), &fields); err != nil {
-		t.Errorf("LogAndAssertJSON failed with error: %v", err)
+		"logger.Error() should log with level error": {
+			logFunc:          testLogger.Error,
+			expectedLogLevel: "error",
+		},
+		"logger.Debug() should log with level debug": {
+			logFunc:          testLogger.Debug,
+			expectedLogLevel: "debug",
+		},
+		"logger.Warn() should log with level warning": {
+			logFunc:          testLogger.Warn,
+			expectedLogLevel: "warning",
+		},
+		"logger.Fatal() should log with level fatal": {
+			logFunc:          testLogger.Fatal,
+			expectedLogLevel: "fatal",
+		},
 	}
-
-	assertions(fields)
-}
-
-func TestWithFieldsInfof(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogWithFields(test.fields).Infof(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "info"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-			wantedTestField := test.fields["testField"]
-			gotTestField := fields["testField"]
-			if gotTestField != wantedTestField {
-				t.Errorf("Test field not correct want %v got %v", wantedTestField, gotTestField)
-			}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			tc.logFunc("foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
 		})
 	}
 }
 
-func TestWithFieldsPrintf(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogWithFields(test.fields).Printf(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "info"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-			wantedTestField := test.fields["testField"]
-			gotTestField := fields["testField"]
-			if gotTestField != wantedTestField {
-				t.Errorf("Test field not correct want %v got %v", wantedTestField, gotTestField)
-			}
+func TestLogLevelsInFormatFuncs(t *testing.T) {
+	type testCase struct {
+		logFunc          func(format string, args ...interface{})
+		expectedLogLevel string
+	}
+	buf := &bytes.Buffer{}
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
+	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
+	testCases := map[string]testCase{
+		"logger.Infof() should log with level info": {
+			logFunc:          testLogger.Infof,
+			expectedLogLevel: "info",
+		},
+		"logger.Errorf() should log with level error": {
+			logFunc:          testLogger.Errorf,
+			expectedLogLevel: "error",
+		},
+		"logger.Debugf() should log with level debug": {
+			logFunc:          testLogger.Debugf,
+			expectedLogLevel: "debug",
+		},
+		"logger.Warnf() should log with level warning": {
+			logFunc:          testLogger.Warnf,
+			expectedLogLevel: "warning",
+		},
+		"logger.Fatalf() should log with level fatal": {
+			logFunc:          testLogger.Fatalf,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			tc.logFunc("foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
 		})
 	}
 }
 
-func TestWithFieldsWarnf(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogWithFields(test.fields).Warnf(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "warning"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-			wantedTestField := test.fields["testField"]
-			gotTestField := fields["testField"]
-			if gotTestField != wantedTestField {
-				t.Errorf("Test field not correct want %v got %v", wantedTestField, gotTestField)
-			}
+// func TestGlobalLoggerLogLevels(t *testing.T) {
+func GlobalLoggerLogLevels(t *testing.T) {
+	type testCase struct {
+		logFunc          func(args ...interface{})
+		expectedLogLevel string
+	}
+
+	buf := &bytes.Buffer{}
+	oldOutput := globalLogger.output
+	oldLevel := globalLogger.level
+	oldExitFunc := globalLogger.logrusLogger.ExitFunc
+	defer func() {
+		// bring global logger to original state after tests
+		ConfigureGlobalLogger(WithOutput(oldOutput), WithLevel(oldLevel))
+		globalLogger.logrusLogger.ExitFunc = oldExitFunc
+	}()
+	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelDebug))
+	globalLogger.logrusLogger.ExitFunc = func(int) {}
+
+	testCases := map[string]testCase{
+		"Info() should log with level info": {
+			logFunc:          Info,
+			expectedLogLevel: "info",
+		},
+		"Error() should log with level error": {
+			logFunc:          Error,
+			expectedLogLevel: "error",
+		},
+		"Debug() should log with level debug": {
+			logFunc:          Debug,
+			expectedLogLevel: "debug",
+		},
+		"Warn() should log with level warning": {
+			logFunc:          Warn,
+			expectedLogLevel: "warning",
+		},
+		"Fatal() should log with level fatal": {
+			logFunc:          Fatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			tc.logFunc("foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
 		})
 	}
 }
 
-func TestWithFieldsErrorf(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogWithFields(test.fields).Errorf(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "error"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-			wantedTestField := test.fields["testField"]
-			gotTestField := fields["testField"]
-			if gotTestField != wantedTestField {
-				t.Errorf("Test field not correct want %v got %v", wantedTestField, gotTestField)
-			}
+// func TestGlobalLoggerLogLevelsInFormatFuncs(t *testing.T) {
+func GlobalLoggerLogLevelsInFormatFuncs(t *testing.T) {
+	type testCase struct {
+		logFunc          func(format string, args ...interface{})
+		expectedLogLevel string
+	}
+
+	buf := &bytes.Buffer{}
+	oldOutput := globalLogger.output
+	oldLevel := globalLogger.level
+	oldExitFunc := globalLogger.logrusLogger.ExitFunc
+	defer func() {
+		// bring global logger to original state after tests
+		ConfigureGlobalLogger(WithOutput(oldOutput), WithLevel(oldLevel))
+		globalLogger.logrusLogger.ExitFunc = oldExitFunc
+	}()
+	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelDebug))
+	globalLogger.logrusLogger.ExitFunc = func(int) {}
+
+	testCases := map[string]testCase{
+		"Info() should log with level info": {
+			logFunc:          Infof,
+			expectedLogLevel: "info",
+		},
+		"Error() should log with level error": {
+			logFunc:          Errorf,
+			expectedLogLevel: "error",
+		},
+		"Debug() should log with level debug": {
+			logFunc:          Debugf,
+			expectedLogLevel: "debug",
+		},
+		"Warn() should log with level warning": {
+			logFunc:          Warnf,
+			expectedLogLevel: "warning",
+		},
+		"Fatal() should log with level fatal": {
+			logFunc:          Fatalf,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			tc.logFunc("foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
 		})
 	}
 }
 
-func TestPrint(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogPrint(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
+func TestLoggingCustomFields(t *testing.T) {
+	type testCase struct {
+		customFieldValue    interface{}
+		expectedLoggedValue interface{}
+	}
+	testCases := map[string]testCase{
+		"string": {
+			customFieldValue:    "foobar",
+			expectedLoggedValue: `"foobar"`,
+		},
+		"int": {
+			customFieldValue:    3,
+			expectedLoggedValue: "3",
+		},
+		"slice of ints": {
+			customFieldValue:    []int{1, 2, 3},
+			expectedLoggedValue: "[1,2,3]",
+		},
+		"error": {
+			customFieldValue:    fmt.Errorf("foobar"),
+			expectedLoggedValue: `"foobar"`,
+		},
+		"map": {
+			customFieldValue: map[string]int{
+				"foo": 1,
+			},
+			expectedLoggedValue: `{"foo":1}`,
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			logger := New(WithLevel(LevelDebug), WithOutput(buf))
+			logger.WithFields(Fields{
+				"customField": tc.customFieldValue,
+			}).Warnf("blabla")
+			log, err := ioutil.ReadAll(buf)
+			if err != nil {
+				t.Fatalf("cannot read buffer: %v", err)
 			}
-			wantedLevel := "info"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
+			expectedLoggedValue := fmt.Sprintf(`"customField":%v`, tc.expectedLoggedValue)
+			if !strings.Contains(string(log), expectedLoggedValue) {
+				t.Fatalf("expected to find %v in log (%v)", expectedLoggedValue, string(log))
 			}
 		})
 	}
+
 }
 
-func TestError(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogError(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "error"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-		})
-	}
-}
-
-func TestInfof(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogInfof(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "info"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-		})
-	}
-}
-
-func TestPrintf(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogPrintf(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "info"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-		})
-	}
-}
-
-func TestWarnf(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogWarnf(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "warning"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-		})
-	}
-}
-
-func TestErrorf(t *testing.T) {
-	for _, test := range testTable {
-		LogAndAssertJSON(t, func(log *LogrusFacade) {
-			log.LogErrorf(test.msg)
-		}, func(fields Fields) {
-			wantedMsg := test.msg
-			gotMsg := fields["msg"]
-			if gotMsg != wantedMsg {
-				t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-			}
-			wantedLevel := "error"
-			gotLevel := fields["level"]
-			if gotLevel != wantedLevel {
-				t.Errorf("Test level not correct want %v got %v", wantedLevel, gotLevel)
-			}
-		})
-	}
-}
-
-func TestRequest(t *testing.T) {
-	wantedMsg := "Test message for TestRequest"
-	req := &http.Request{
-		Method: http.MethodGet,
-		URL:    &url.URL{},
-	}
-	LogAndAssertJSON(t, func(log *LogrusFacade) {
-		reqFields := Fields{
-			"remote_ip":  req.RemoteAddr,
-			"user_agent": req.Header.Get("User-Agent"),
-			"method":     req.Method,
+func contains(levels []Level, level Level) bool {
+	for _, l := range levels {
+		if l == level {
+			return true
 		}
-		log.LogWithFields(reqFields).Infof(wantedMsg)
-	}, func(fields Fields) {
-		gotMsg := fields["msg"]
-		if gotMsg != wantedMsg {
-			t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-		}
-		wantedMethod := req.Method
-		gotMethod := fields["method"]
-		if gotMethod != wantedMethod {
-			t.Errorf("Request method not correct want %v got %v", wantedMethod, gotMethod)
-		}
-	})
+	}
+	return false
 }
 
-func TestNilRequest(t *testing.T) {
-	wantedMsg := "Test message for TestNilRequest"
-	req := &http.Request{
-		URL: &url.URL{},
+func wasLogged(t *testing.T, logReader io.Reader) bool {
+	bytes, err := ioutil.ReadAll(logReader)
+	if err != nil && err != io.EOF {
+		t.Fatalf("cannot read log entry: %v", err)
 	}
-	LogAndAssertJSON(t, func(log *LogrusFacade) {
-		reqFields := Fields{
-			"remote_ip":  req.RemoteAddr,
-			"user_agent": req.Header.Get("User-Agent"),
-			"method":     req.Method,
-		}
-		log.LogWithFields(reqFields).Infof(wantedMsg)
-	}, func(fields Fields) {
-		gotMsg := fields["msg"]
-		if gotMsg != wantedMsg {
-			t.Errorf("Test message not correct want %v got %v", wantedMsg, gotMsg)
-		}
-		wantedMethod := req.Method
-		gotMethod := fields["method"]
-		if gotMethod != wantedMethod {
-			t.Errorf("Request method not correct want %v got %v", wantedMethod, gotMethod)
-		}
-	})
+	return !(err == io.EOF || len(bytes) == 0)
+}
+
+func TestSettingLogLevel(t *testing.T) {
+	type testCase struct {
+		logLevel             Level
+		expectedLoggedLevels []Level
+	}
+
+	testCases := map[string]testCase{
+		"log fatal and above": {
+			logLevel:             LevelFatal,
+			expectedLoggedLevels: []Level{LevelFatal},
+		},
+		"log error and above": {
+			logLevel:             LevelError,
+			expectedLoggedLevels: []Level{LevelError, LevelFatal},
+		},
+		"log warn and above": {
+			logLevel:             LevelWarn,
+			expectedLoggedLevels: []Level{LevelWarn, LevelError, LevelFatal},
+		},
+		"log info and above": {
+			logLevel:             LevelInfo,
+			expectedLoggedLevels: []Level{LevelInfo, LevelWarn, LevelError, LevelFatal},
+		},
+		"log debug and above": {
+			logLevel:             LevelDebug,
+			expectedLoggedLevels: []Level{LevelDebug, LevelInfo, LevelWarn, LevelError, LevelFatal},
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			buf := &bytes.Buffer{}
+			logger := New(WithOutput(buf), WithLevel(tc.logLevel))
+			logger.logrusLogger.ExitFunc = func(int) {}
+
+			logger.Debug("debug")
+			if contains(tc.expectedLoggedLevels, LevelDebug) != wasLogged(t, buf) {
+				t.Fatalf("debug level was incorrectly filtered")
+			}
+
+			logger.Info("info")
+			if contains(tc.expectedLoggedLevels, LevelInfo) != wasLogged(t, buf) {
+				t.Fatalf("info level was incorrectly filtered")
+			}
+
+			logger.Warn("warn")
+			if contains(tc.expectedLoggedLevels, LevelWarn) != wasLogged(t, buf) {
+				t.Fatalf("warn level was incorrectly filtered")
+			}
+
+			logger.Error("error")
+			if contains(tc.expectedLoggedLevels, LevelError) != wasLogged(t, buf) {
+				t.Fatalf("error level was incorrectly filtered")
+			}
+
+			logger.Fatal("fatal")
+			if contains(tc.expectedLoggedLevels, LevelFatal) != wasLogged(t, buf) {
+				t.Fatalf("fatal level was incorrectly filtered")
+			}
+		})
+	}
 }
