@@ -1,3 +1,6 @@
+// All examples disable reporing caller as file path depends on workdir
+// which is different for every run environment and therefore it's impossible
+// to match exact output.
 package logger
 
 import (
@@ -10,7 +13,7 @@ func mockNowFunc() time.Time {
 }
 
 func ExampleInfo() {
-	logger := New(WithNowFunc(mockNowFunc))
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false))
 	logger.Warn("foobar")
 	logger.Info("i won't be logged because the default log level is higher than info")
 	logger.Error("foobar")
@@ -19,7 +22,7 @@ func ExampleInfo() {
 }
 
 func ExampleWithLevel() {
-	logger := New(WithNowFunc(mockNowFunc), WithLevel(LevelInfo))
+	logger := New(WithNowFunc(mockNowFunc), WithLevel(LevelInfo), WithReportCaller(false))
 	logger.Info("now log level is set to info or lower, I will be logged")
 	// Output: {"level":"info","msg":"now log level is set to info or lower, I will be logged","time":"2020-10-10T10:10:10Z"}
 }
@@ -29,9 +32,9 @@ func ExampleWithFields() {
 	oldOutput := globalLogger.output
 	oldNowFunc := globalLogger.now
 	defer func() {
-		ConfigureGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc))
+		ConfigureGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc), WithReportCaller(true))
 	}()
-	ConfigureGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc))
+	ConfigureGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc), WithReportCaller(false))
 
 	WithFields(Fields{
 		"timeSpentOnConfiguration": 0,
@@ -51,9 +54,9 @@ func ExampleGlobal() {
 	oldOutput := globalLogger.output
 	oldNowFunc := globalLogger.now
 	defer func() {
-		ConfigureGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc))
+		ConfigureGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc), WithReportCaller(true))
 	}()
-	ConfigureGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc))
+	ConfigureGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc), WithReportCaller(false))
 
 	funcThatAcceptsInterface(Global())
 	// Output: {"level":"warning","msg":"foobar","time":"2020-10-10T10:10:10Z"}

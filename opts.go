@@ -33,3 +33,10 @@ func WithLevel(level Level) LoggerOption {
 		l.level = level
 	})
 }
+
+// WithReportCaller allows enabling/disabling including calling method in the log entry
+func WithReportCaller(enable bool) LoggerOption {
+	return LoggerOptionFunc(func(l *Logger) {
+		l.reportCaller = enable
+	})
+}

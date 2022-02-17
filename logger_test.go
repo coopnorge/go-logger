@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -20,8 +21,43 @@ func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expec
 	if !ok {
 		t.Fatalf("no value found for key %v", key)
 	}
-	if v != expectedValue {
-		t.Fatalf("expected log[%v] to have value: %v, got: %v", key, expectedValue, v)
+	switch expected := expectedValue.(type) {
+	case *regexp.Regexp:
+		vString, ok := v.(string)
+		if !ok {
+			t.Fatalf("cannot match regexp against non-string value")
+		}
+		if !expected.MatchString(vString) {
+			t.Fatalf("log[%v]=%v does not match regexp: %v", key, expected, vString)
+		}
+	default:
+		if v != expected {
+			t.Fatalf("expected log[%v] to have value: %v, got: %v", key, expected, v)
+		}
+	}
+}
+
+func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
+	log := make(map[string]interface{})
+	err := json.NewDecoder(logReader).Decode(&log)
+	if err != nil {
+		t.Fatalf("cannot decode log entry: %v", err)
+	}
+	_, ok := log[key]
+	if !ok {
+		t.Fatalf("key not found: %v", key)
+	}
+}
+
+func assertLogEntryDoesNotHaveKey(t *testing.T, logReader io.Reader, key string) {
+	log := make(map[string]interface{})
+	err := json.NewDecoder(logReader).Decode(&log)
+	if err != nil {
+		t.Fatalf("cannot decode log entry: %v", err)
+	}
+	_, ok := log[key]
+	if ok {
+		t.Fatalf("unexpected key found: %v", key)
 	}
 }
 
@@ -325,4 +361,22 @@ func TestSettingLogLevel(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReporingCaller(t *testing.T) {
+	buf := &bytes.Buffer{}
+	tee := io.TeeReader(buf, buf)
+	logger := New(WithOutput(buf))
+	logger.Error("foobar")
+	assertLogEntryContains(t, tee, "file", regexp.MustCompile(`.*\.go:\d+$`))
+	assertLogEntryHasKey(t, tee, "function")
+}
+
+func TestDisableReportingCaller(t *testing.T) {
+	buf := &bytes.Buffer{}
+	tee := io.TeeReader(buf, buf)
+	logger := New(WithOutput(buf), WithReportCaller(false))
+	logger.Error("foobar")
+	assertLogEntryDoesNotHaveKey(t, tee, "file")
+	assertLogEntryDoesNotHaveKey(t, tee, "function")
 }
