@@ -25,7 +25,12 @@ func ExampleWithLevel() {
 }
 
 func ExampleWithFields() {
-	// example runner replaces os.Stdout to catch output and compare it with desired output, so we need to overwrite default output, which points to actual system standard output, since it is initialized before tests and examples run
+	// Example runner replaces os.Stdout to catch output and compares it with desired output.
+	// Global logger instance sets default output to os.Stdin before example runner has a chance to overwrite it.
+	// Within this function, os.Stdin is already replaced by example runner.
+	// So we need to tell the global logger instance to use modified os.Stdout as its output,
+	// otherwise example runner will fail as logs would be written to real stdout
+	// and nothing would get written to example runnner's buffer.
 	oldOutput := globalLogger.output
 	oldNowFunc := globalLogger.now
 	defer func() {
