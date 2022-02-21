@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"time"
@@ -19,6 +20,7 @@ type Logger struct {
 	now          NowFunc
 	output       io.Writer
 	level        Level
+	reportCaller bool
 }
 
 func (l *Logger) applyOptions(opts ...LoggerOption) {
@@ -37,13 +39,20 @@ func New(opts ...LoggerOption) *Logger {
 		now:          NowFunc(time.Now),
 		output:       os.Stdout,
 		level:        LevelWarn,
+		reportCaller: true,
 	}
 	logger.applyOptions(opts...)
 	return logger
 }
 
 func (l *Logger) entry() Entry {
-	return l.logrusLogger.WithTime(l.now())
+	fields := logrus.Fields{}
+	if l.reportCaller {
+		frame := getCaller()
+		fields["file"] = fmt.Sprintf("%s:%v", frame.File, frame.Line)
+		fields["function"] = frame.Function
+	}
+	return l.logrusLogger.WithTime(l.now()).WithFields(fields)
 }
 
 // WithFields forwards a logging call with fields
