@@ -10,6 +10,11 @@ func Global() *Logger {
 	return globalLogger
 }
 
+// SetLogLevel to new Level for global logger
+func SetLogLevel(lvl Level) {
+	globalLogger.SetLevel(lvl)
+}
+
 // WithFields creates log entry using global logger
 func WithFields(fields Fields) Entry {
 	return globalLogger.WithFields(fields)
