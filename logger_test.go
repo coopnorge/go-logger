@@ -99,43 +99,6 @@ func TestLogLevels(t *testing.T) {
 	}
 }
 
-func TestLogLevelsSwitch(t *testing.T) {
-	type testCase struct {
-		logFunc          func(args ...interface{})
-		expectedLogLevel string
-	}
-
-	buf := &bytes.Buffer{}
-	testLogger := New(WithOutput(buf), WithLevel(LevelFatal))
-	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
-
-	testCases := map[string]testCase{
-		"logger.Fatal() should log with level fatal": {
-			logFunc:          testLogger.Fatal,
-			expectedLogLevel: "fatal",
-		},
-		"logger.Info() should log with level info": {
-			logFunc:          testLogger.Info,
-			expectedLogLevel: "info",
-		},
-		"logger.Error() should log with level error": {
-			logFunc:          testLogger.Error,
-			expectedLogLevel: "error",
-		},
-		"logger.Warn() should log with level warning": {
-			logFunc:          testLogger.Warn,
-			expectedLogLevel: "warning",
-		},
-	}
-	for name, tc := range testCases {
-		t.Run(name, func(t *testing.T) {
-			testLogger.SetLevel(LevelInfo)
-			tc.logFunc("foobar")
-			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
-		})
-	}
-}
-
 func TestLogLevelsInFormatFuncs(t *testing.T) {
 	type testCase struct {
 		logFunc          func(format string, args ...interface{})

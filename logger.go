@@ -55,12 +55,6 @@ func (logger *Logger) entry() Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(fields)
 }
 
-// SetLevel for Logger visibility
-func (logger *Logger) SetLevel(lvl Level) {
-	logger.level = lvl
-	logger.logrusLogger.SetLevel(mapLevelToLogrusLevel(logger.level))
-}
-
 // WithFields forwards a logging call with fields
 func (logger *Logger) WithFields(fields Fields) Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(logrus.Fields(fields))
