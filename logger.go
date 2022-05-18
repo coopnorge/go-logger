@@ -37,7 +37,7 @@ func New(opts ...LoggerOption) *Logger {
 	logger := &Logger{
 		logrusLogger: logrusLogger,
 		now:          NowFunc(time.Now),
-		output:       os.Stdout,
+		output:       os.Stderr,
 		level:        LevelWarn,
 		reportCaller: true,
 	}
