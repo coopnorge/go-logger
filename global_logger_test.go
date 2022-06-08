@@ -100,3 +100,27 @@ func TestGlobalLoggerLogLevelsInFormatFuncs(t *testing.T) {
 		})
 	}
 }
+
+func TestGlobalLoggerConvenienveFunctions(t *testing.T) {
+	buf := &bytes.Buffer{}
+	oldOutput := globalLogger.output
+	oldNowFunc := globalLogger.now
+	defer func() {
+		SetOutput(oldOutput)
+		SetNowFunc(oldNowFunc)
+		SetReportCaller(true)
+		SetLevel(globalLogger.level)
+	}()
+	{
+		SetOutput(buf)
+		SetNowFunc(mockNowFunc)
+		SetReportCaller(false)
+	}
+
+	Warn("foobar")
+	assertLogEntryContains(t, buf, "msg", "foobar")
+	Info("I won't be logged because the default log level is higher than info")
+	SetLevel(LevelInfo)
+	Info("but now I will")
+	assertLogEntryContains(t, buf, "msg", "but now I will")
+}
