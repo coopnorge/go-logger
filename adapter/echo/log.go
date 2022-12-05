@@ -1,4 +1,4 @@
-package echo
+package labstack_logger
 
 import (
 	"encoding/json"
