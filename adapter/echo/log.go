@@ -11,8 +11,7 @@ import (
 // WrappedEchoLogger that can be passed to Echo middleware for Datadog integration
 // implements Echo Logger from vendor/github.com/labstack/echo/v4/log.go
 type WrappedEchoLogger struct {
-	log    log.Entry
-	output io.Writer
+	log *log.Logger
 
 	// prefix for logs
 	prefix string
@@ -30,13 +29,11 @@ func NewWrappedEchoLogger() *WrappedEchoLogger {
 
 // Output not supported to access in Coop logger, so it's returns only stub
 func (wel *WrappedEchoLogger) Output() io.Writer {
-	return wel.output
+	return wel.log.OutputHandler()
 }
 
 // SetOutput not supported to change in Coop logger, accepting only stub
-func (wel *WrappedEchoLogger) SetOutput(w io.Writer) {
-	wel.output = w
-}
+func (wel *WrappedEchoLogger) SetOutput(_ io.Writer) {}
 
 func (wel *WrappedEchoLogger) Prefix() string {
 	return wel.prefix

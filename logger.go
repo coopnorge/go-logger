@@ -60,6 +60,11 @@ func (logger *Logger) WithFields(fields Fields) Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(logrus.Fields(fields))
 }
 
+// OutputHandler returns logger output handler
+func (logger *Logger) OutputHandler() io.Writer {
+	return logger.output
+}
+
 // Infof forwards a logging call in the (format, args) format
 func (logger *Logger) Info(args ...interface{}) {
 	logger.entry().Info(args...)
