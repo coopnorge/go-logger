@@ -4,10 +4,12 @@ import "io"
 
 var globalLogger = New()
 
+// ConfigureGlobalLogger applies supplied logger options to the global logger
 func ConfigureGlobalLogger(opts ...LoggerOption) {
 	globalLogger.applyOptions(opts...)
 }
 
+// Global logger that can be accessed without prior instantiation
 func Global() *Logger {
 	return globalLogger
 }
@@ -17,7 +19,7 @@ func WithFields(fields Fields) Entry {
 	return globalLogger.WithFields(fields)
 }
 
-// Infof uses global logger to log payload on "info" level
+// Info uses global logger to log payload on "info" level
 func Info(args ...interface{}) {
 	globalLogger.Info(args...)
 }
@@ -82,7 +84,7 @@ func SetLevel(level Level) {
 	ConfigureGlobalLogger(WithLevel(level))
 }
 
-// SetReportCaller allows controling if caller info should be attached to logs by global logger
+// SetReportCaller allows controlling if caller info should be attached to logs by global logger
 func SetReportCaller(enable bool) {
 	ConfigureGlobalLogger(WithReportCaller(enable))
 }

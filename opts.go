@@ -2,12 +2,15 @@ package logger
 
 import "io"
 
-type LoggerOption interface {
+// LoggerOption defines an applicator interface
+type LoggerOption interface { //nolint:all
 	Apply(l *Logger)
 }
 
-type LoggerOptionFunc func(l *Logger)
+// LoggerOptionFunc defines a function which modifies a logger
+type LoggerOptionFunc func(l *Logger) //nolint:all
 
+// Apply redirects a function call to the function receiver
 func (lof LoggerOptionFunc) Apply(l *Logger) {
 	lof(l)
 }

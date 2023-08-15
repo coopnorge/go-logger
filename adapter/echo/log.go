@@ -1,4 +1,6 @@
-package labstack_logger
+// Ignore package name lint warning to remain backwards compatible until a breaking change is planned
+
+package labstack_logger //nolint:all
 
 import (
 	"encoding/json"
@@ -35,14 +37,17 @@ func (wel *WrappedEchoLogger) Output() io.Writer {
 // SetOutput not supported to change in Coop logger, accepting only stub
 func (wel *WrappedEchoLogger) SetOutput(_ io.Writer) {}
 
+// Prefix returns the current log prefix
 func (wel *WrappedEchoLogger) Prefix() string {
 	return wel.prefix
 }
 
+// SetPrefix sets a string that will be prefixed to each log line
 func (wel *WrappedEchoLogger) SetPrefix(p string) {
 	wel.prefix = p
 }
 
+// Level returns a mapped Echo log level
 func (wel *WrappedEchoLogger) Level() echo.Lvl {
 	switch wel.level {
 	case log.LevelDebug:
@@ -60,6 +65,7 @@ func (wel *WrappedEchoLogger) Level() echo.Lvl {
 	}
 }
 
+// SetLevel maps the log level from an Echo log level
 func (wel *WrappedEchoLogger) SetLevel(v echo.Lvl) {
 	switch v {
 	case echo.DEBUG:
@@ -80,88 +86,109 @@ func (wel *WrappedEchoLogger) SetLevel(v echo.Lvl) {
 // SetHeader not supported
 func (wel *WrappedEchoLogger) SetHeader(_ string) {}
 
+// Print logs at the info level
 func (wel *WrappedEchoLogger) Print(i ...interface{}) {
 	wel.log.Info(i...)
 }
 
+// Printf logs formatted output at the info level
 func (wel *WrappedEchoLogger) Printf(format string, args ...interface{}) {
 	wel.log.Infof(format, args...)
 }
 
+// Printj marshals a map to JSON and and logs it at the info level
 func (wel *WrappedEchoLogger) Printj(j echo.JSON) {
 	wel.log.Info(wel.jsonToString(j))
 }
 
+// Debug logs at the debug level
 func (wel *WrappedEchoLogger) Debug(i ...interface{}) {
 	wel.log.Debug(i...)
 }
 
+// Debugf logs formatted output at the debug level
 func (wel *WrappedEchoLogger) Debugf(format string, args ...interface{}) {
 	wel.log.Debugf(format, args...)
 }
 
+// Debugj marshals a map to JSON and and logs it at the debug level
 func (wel *WrappedEchoLogger) Debugj(j echo.JSON) {
 	wel.log.Debug(wel.jsonToString(j))
 }
 
+// Info logs at the info level
 func (wel *WrappedEchoLogger) Info(i ...interface{}) {
 	wel.log.Info(i...)
 }
 
+// Infof logs formatted output at the info level
 func (wel *WrappedEchoLogger) Infof(format string, args ...interface{}) {
 	wel.log.Infof(format, args...)
 }
 
+// Infoj marshals a map to JSON and and logs it at the info level
 func (wel *WrappedEchoLogger) Infoj(j echo.JSON) {
 	wel.log.Info(wel.jsonToString(j))
 }
 
+// Warn logs at the warn level
 func (wel *WrappedEchoLogger) Warn(i ...interface{}) {
 	wel.log.Warn(i...)
 }
 
+// Warnf logs formatted output at the warn level
 func (wel *WrappedEchoLogger) Warnf(format string, args ...interface{}) {
 	wel.log.Warnf(format, args...)
 }
 
+// Warnj marshals a map to JSON and and logs it at the warn level
 func (wel *WrappedEchoLogger) Warnj(j echo.JSON) {
 	wel.log.Warn(wel.jsonToString(j))
 }
 
+// Error logs at the error level
 func (wel *WrappedEchoLogger) Error(i ...interface{}) {
 	wel.log.Error(i...)
 }
 
+// Errorf logs formatted output at the error level
 func (wel *WrappedEchoLogger) Errorf(format string, args ...interface{}) {
 	wel.log.Errorf(format, args...)
 }
 
+// Errorj marshals a map to JSON and and logs it at the error level
 func (wel *WrappedEchoLogger) Errorj(j echo.JSON) {
 	wel.log.Error(wel.jsonToString(j))
 }
 
+// Fatal logs fatally
 func (wel *WrappedEchoLogger) Fatal(i ...interface{}) {
 	wel.log.Fatal(i...)
 }
 
-func (wel *WrappedEchoLogger) Fatalj(j echo.JSON) {
-	wel.log.Fatal(wel.jsonToString(j))
-}
-
+// Fatalf logs formatted output fatally
 func (wel *WrappedEchoLogger) Fatalf(format string, args ...interface{}) {
 	wel.log.Fatalf(format, args...)
 }
 
+// Fatalj marshals a map to JSON and and logs it fatally
+func (wel *WrappedEchoLogger) Fatalj(j echo.JSON) {
+	wel.log.Fatal(wel.jsonToString(j))
+}
+
+// Panic wraps a call to Fatal
 func (wel *WrappedEchoLogger) Panic(i ...interface{}) {
 	wel.log.Fatal(i...)
 }
 
-func (wel *WrappedEchoLogger) Panicj(j echo.JSON) {
-	wel.log.Fatal(wel.jsonToString(j))
-}
-
+// Panicf wraps a call to Fatalf
 func (wel *WrappedEchoLogger) Panicf(format string, args ...interface{}) {
 	wel.log.Fatalf(format, args...)
+}
+
+// Panicj wraps a call to Fatalj
+func (wel *WrappedEchoLogger) Panicj(j echo.JSON) {
+	wel.log.Fatal(wel.jsonToString(j))
 }
 
 func (wel *WrappedEchoLogger) jsonToString(j echo.JSON) string {

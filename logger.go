@@ -12,6 +12,7 @@ import (
 // Fields type, used to pass to `WithFields`.
 type Fields map[string]interface{}
 
+// NowFunc is a typedef for a function which returns the current time
 type NowFunc func() time.Time
 
 // Logger is our logger with the needed structured logger we use
@@ -31,6 +32,7 @@ func (logger *Logger) applyOptions(opts ...LoggerOption) {
 	logger.logrusLogger.SetLevel(mapLevelToLogrusLevel(logger.level))
 }
 
+// New creates and returns a new logger with supplied options
 func New(opts ...LoggerOption) *Logger {
 	logrusLogger := logrus.New()
 	logrusLogger.SetFormatter(&logrus.JSONFormatter{})
@@ -65,7 +67,7 @@ func (logger *Logger) OutputHandler() io.Writer {
 	return logger.output
 }
 
-// Infof forwards a logging call in the (format, args) format
+// Info forwards a logging call in the (format, args) format
 func (logger *Logger) Info(args ...interface{}) {
 	logger.entry().Info(args...)
 }

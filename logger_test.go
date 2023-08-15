@@ -183,7 +183,6 @@ func TestLoggingCustomFields(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func contains(levels []Level, level Level) bool {
