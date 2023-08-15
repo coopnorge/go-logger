@@ -55,6 +55,11 @@ func (logger *Logger) entry() Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(fields)
 }
 
+// WithField forwards a logging call with a field
+func (logger *Logger) WithField(key string, value interface{}) Entry {
+	return logger.logrusLogger.WithTime(logger.now()).WithField(key, value)
+}
+
 // WithFields forwards a logging call with fields
 func (logger *Logger) WithFields(fields Fields) Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(logrus.Fields(fields))

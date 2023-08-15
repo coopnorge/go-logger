@@ -43,8 +43,11 @@ func ExampleWithFields() {
 
 	WithFields(Fields{
 		"timeSpentOnConfiguration": 0,
+		"defaultsLoaded":           true,
 	}).Warn("use default logger with 0 configuration")
-	// Output: {"level":"warning","msg":"use default logger with 0 configuration","time":"2020-10-10T10:10:10Z","timeSpentOnConfiguration":0}
+	WithField("singleField", true).Warn("example with a single field")
+	// Output: {"defaultsLoaded":true,"level":"warning","msg":"use default logger with 0 configuration","time":"2020-10-10T10:10:10Z","timeSpentOnConfiguration":0}
+	// {"level":"warning","msg":"example with a single field","singleField":true,"time":"2020-10-10T10:10:10Z"}
 }
 
 type warner interface {
