@@ -167,12 +167,16 @@ func TestLoggingCustomFields(t *testing.T) {
 		},
 	}
 	for name, tc := range testCases {
-		t.Run(name, func(t *testing.T) {
+		f := func(t *testing.T, useSingle bool) {
 			buf := &bytes.Buffer{}
 			logger := New(WithLevel(LevelDebug), WithOutput(buf))
-			logger.WithFields(Fields{
-				"customField": tc.customFieldValue,
-			}).Warnf("blabla")
+			if useSingle {
+				logger.WithField("customField", tc.customFieldValue).Warnf("blabla")
+			} else {
+				logger.WithFields(Fields{
+					"customField": tc.customFieldValue,
+				}).Warnf("blabla")
+			}
 			log, err := ioutil.ReadAll(buf)
 			if err != nil {
 				t.Fatalf("cannot read buffer: %v", err)
@@ -181,7 +185,9 @@ func TestLoggingCustomFields(t *testing.T) {
 			if !strings.Contains(string(log), expectedLoggedValue) {
 				t.Fatalf("expected to find %v in log (%v)", expectedLoggedValue, string(log))
 			}
-		})
+		}
+		t.Run(name+"_single", func(t *testing.T) { f(t, true) })
+		t.Run(name+"_multiple", func(t *testing.T) { f(t, false) })
 	}
 
 }

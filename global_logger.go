@@ -12,6 +12,11 @@ func Global() *Logger {
 	return globalLogger
 }
 
+// WithField creates log entry using global logger
+func WithField(key string, value interface{}) Entry {
+	return globalLogger.WithField(key, value)
+}
+
 // WithFields creates log entry using global logger
 func WithFields(fields Fields) Entry {
 	return globalLogger.WithFields(fields)
