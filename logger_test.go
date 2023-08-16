@@ -189,7 +189,6 @@ func TestLoggingCustomFields(t *testing.T) {
 		t.Run(name+"_single", func(t *testing.T) { f(t, true) })
 		t.Run(name+"_multiple", func(t *testing.T) { f(t, false) })
 	}
-
 }
 
 func contains(levels []Level, level Level) bool {

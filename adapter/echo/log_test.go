@@ -1,4 +1,6 @@
-package labstack_logger
+// Ignore package name lint warning to remain backwards compatible until a breaking change is planned
+
+package labstack_logger //nolint:all
 
 import (
 	"bytes"
@@ -7,7 +9,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-func TestWrappedEchoLogger(t *testing.T) {
+func TestWrappedEchoLogger(_ *testing.T) {
 	l := NewWrappedEchoLogger()
 	jTest := log.JSON{"name": "value"}
 
