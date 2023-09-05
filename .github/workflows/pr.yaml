@@ -11,7 +11,7 @@ jobs:
       docker-compose-service: golang-devtools
       XDG_CACHE_HOME: ${{ github.workspace }}/.cache/xdg
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -46,7 +46,7 @@ jobs:
         go: [ '1.16', '1.17', '1.18' ]
     name: Go ${{ matrix.go }} - validate
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup go
         uses: actions/setup-go@v4
         with:
