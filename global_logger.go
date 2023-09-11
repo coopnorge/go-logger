@@ -14,6 +14,11 @@ func Global() *Logger {
 	return globalLogger
 }
 
+// WithError is a convenience wrapper for WithField("err", err)
+func WithError(err error) Entry {
+	return globalLogger.WithError(err)
+}
+
 // WithField creates log entry using global logger
 func WithField(key string, value interface{}) Entry {
 	return globalLogger.WithField(key, value)

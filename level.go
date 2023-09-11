@@ -1,6 +1,10 @@
 package logger
 
-import "github.com/sirupsen/logrus"
+import (
+	"strings"
+
+	"github.com/sirupsen/logrus"
+)
 
 // Level is an integer representation of the logging level
 type Level uint8
@@ -17,6 +21,20 @@ const (
 	// LevelDebug should only be used in dev/test environments.
 	LevelDebug
 )
+
+var nameMapping = map[string]Level{
+	"fatal": LevelFatal,
+	"error": LevelError,
+	"warn":  LevelWarn,
+	"info":  LevelInfo,
+	"debug": LevelDebug,
+}
+
+// LevelNameToLevel converts a named log level to the Level type
+func LevelNameToLevel(name string) (l Level, ok bool) {
+	l, ok = nameMapping[strings.ToLower(name)]
+	return
+}
 
 func mapLevelToLogrusLevel(l Level) logrus.Level {
 	switch l {

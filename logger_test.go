@@ -270,6 +270,22 @@ func TestSettingLogLevel(t *testing.T) {
 	}
 }
 
+func TestWithLevelName(t *testing.T) {
+	for name, lvl := range nameMapping {
+		logger := New(WithLevelName(name))
+		if logger.level != lvl {
+			t.Fatalf("expected level %v, got %v", lvl, logger.logrusLogger.Level)
+		}
+	}
+}
+
+func TestBadLevelName(t *testing.T) {
+	_, ok := LevelNameToLevel("invalid")
+	if ok {
+		t.Fatalf("Invalid level should not be ok")
+	}
+}
+
 func TestReporingCaller(t *testing.T) {
 	buf := &bytes.Buffer{}
 	tee := io.TeeReader(buf, buf)
