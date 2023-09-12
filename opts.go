@@ -37,6 +37,18 @@ func WithLevel(level Level) LoggerOption {
 	})
 }
 
+// WithLevelName sets minimum level for filtering logs by name
+func WithLevelName(level string) LoggerOption {
+	return LoggerOptionFunc(func(l *Logger) {
+		lvl, ok := LevelNameToLevel(level)
+		if !ok {
+			lvl = LevelWarn
+			l.Warn("Invalid log level, defaulting to Warn")
+		}
+		l.level = lvl
+	})
+}
+
 // WithReportCaller allows enabling/disabling including calling method in the log entry
 func WithReportCaller(enable bool) LoggerOption {
 	return LoggerOptionFunc(func(l *Logger) {

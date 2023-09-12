@@ -4,6 +4,7 @@
 package logger
 
 import (
+	"errors"
 	"os"
 	"time"
 )
@@ -23,6 +24,12 @@ func ExampleInfo() {
 
 func ExampleWithLevel() {
 	logger := New(WithNowFunc(mockNowFunc), WithLevel(LevelInfo), WithReportCaller(false))
+	logger.Info("now log level is set to info or lower, I will be logged")
+	// Output: {"level":"info","msg":"now log level is set to info or lower, I will be logged","time":"2020-10-10T10:10:10Z"}
+}
+
+func ExampleWithLevelName() {
+	logger := New(WithNowFunc(mockNowFunc), WithLevelName("info"), WithReportCaller(false))
 	logger.Info("now log level is set to info or lower, I will be logged")
 	// Output: {"level":"info","msg":"now log level is set to info or lower, I will be logged","time":"2020-10-10T10:10:10Z"}
 }
@@ -48,6 +55,14 @@ func ExampleWithFields() {
 	WithField("singleField", true).Warn("example with a single field")
 	// Output: {"defaultsLoaded":true,"level":"warning","msg":"use default logger with 0 configuration","time":"2020-10-10T10:10:10Z","timeSpentOnConfiguration":0}
 	// {"level":"warning","msg":"example with a single field","singleField":true,"time":"2020-10-10T10:10:10Z"}
+}
+
+func ExampleWithError() {
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false))
+
+	err := errors.New("Test error")
+	logger.WithError(err).Error("Operation failed")
+	// Output: {"error":"Test error","level":"error","msg":"Operation failed","time":"2020-10-10T10:10:10Z"}
 }
 
 type warner interface {

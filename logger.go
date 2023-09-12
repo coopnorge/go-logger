@@ -57,6 +57,13 @@ func (logger *Logger) entry() Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(fields)
 }
 
+const errorKey = "error"
+
+// WithError is a convenience wrapper for WithField("error", err)
+func (logger *Logger) WithError(err error) Entry {
+	return logger.WithField(errorKey, err)
+}
+
 // WithField forwards a logging call with a field
 func (logger *Logger) WithField(key string, value interface{}) Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithField(key, value)
