@@ -1,8 +1,7 @@
 ---
 on:
-  push:
-    branches-ignore:
-      - main
+  pull_request: {}
+
 jobs:
   golang-ci:
     name: Go Lang CI
