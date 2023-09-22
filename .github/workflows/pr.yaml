@@ -1,7 +1,9 @@
 ---
 on:
   pull_request: {}
-
+  push:
+    branches:
+      - main
 jobs:
   golang-ci:
     name: Go Lang CI
