@@ -1,6 +1,6 @@
 module github.com/coopnorge/go-logger
 
-go 1.17
+go 1.20
 
 require (
 	github.com/labstack/gommon v0.4.0

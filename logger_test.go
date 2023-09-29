@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"regexp"
 	"strings"
 	"testing"
@@ -177,7 +176,7 @@ func TestLoggingCustomFields(t *testing.T) {
 					"customField": tc.customFieldValue,
 				}).Warnf("blabla")
 			}
-			log, err := ioutil.ReadAll(buf)
+			log, err := io.ReadAll(buf)
 			if err != nil {
 				t.Fatalf("cannot read buffer: %v", err)
 			}
@@ -201,7 +200,7 @@ func contains(levels []Level, level Level) bool {
 }
 
 func wasLogged(t *testing.T, logReader io.Reader) bool {
-	b, err := ioutil.ReadAll(logReader)
+	b, err := io.ReadAll(logReader)
 	if err != nil && err != io.EOF {
 		t.Fatalf("cannot read log entry: %v", err)
 	}
