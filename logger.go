@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -72,6 +73,11 @@ func (logger *Logger) WithField(key string, value interface{}) Entry {
 // WithFields forwards a logging call with fields
 func (logger *Logger) WithFields(fields Fields) Entry {
 	return logger.logrusLogger.WithTime(logger.now()).WithFields(logrus.Fields(fields))
+}
+
+// WithContext forwards a logging call with fields
+func (logger *Logger) WithContext(ctx context.Context) Entry {
+	return logger.logrusLogger.WithTime(logger.now()).WithContext(ctx)
 }
 
 // OutputHandler returns logger output handler

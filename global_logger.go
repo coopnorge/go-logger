@@ -1,6 +1,9 @@
 package logger
 
-import "io"
+import (
+	"context"
+	"io"
+)
 
 var globalLogger = New()
 
@@ -27,6 +30,11 @@ func WithField(key string, value interface{}) Entry {
 // WithFields creates log entry using global logger
 func WithFields(fields Fields) Entry {
 	return globalLogger.WithFields(fields)
+}
+
+// WithContext creates log entry using global logger
+func WithContext(ctx context.Context) Entry {
+	return globalLogger.WithContext(ctx)
 }
 
 // Info uses global logger to log payload on "info" level

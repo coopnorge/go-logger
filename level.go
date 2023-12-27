@@ -52,3 +52,20 @@ func mapLevelToLogrusLevel(l Level) logrus.Level {
 	// should never get here
 	return logrus.DebugLevel
 }
+
+func mapLogrusLevelToLevel(l logrus.Level) Level {
+	switch l {
+	case logrus.FatalLevel:
+		return LevelFatal
+	case logrus.ErrorLevel:
+		return LevelError
+	case logrus.WarnLevel:
+		return LevelWarn
+	case logrus.InfoLevel:
+		return LevelInfo
+	case logrus.DebugLevel:
+		return LevelDebug
+	}
+	// should never get here
+	return LevelDebug
+}

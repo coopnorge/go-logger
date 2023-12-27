@@ -2,6 +2,7 @@ package logger
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -301,4 +302,55 @@ func TestDisableReportingCaller(t *testing.T) {
 	logger.Error("foobar")
 	assertLogEntryDoesNotHaveKey(t, tee, "file")
 	assertLogEntryDoesNotHaveKey(t, tee, "function")
+}
+
+type myCtxKey struct{}
+
+// Fire - implement Hook interface fire the entry
+func testHook(entry *HookEntry) (bool, error) {
+	ctx := entry.Context
+	if ctx == nil {
+		return false, nil
+	}
+
+	val := ctx.Value(myCtxKey{})
+	if val == nil {
+		return false, nil
+	}
+
+	str, ok := val.(string)
+	if !ok || str == "" {
+		return false, nil
+	}
+
+	entry.Data["my-custom-log-key"] = str
+	return true, nil
+}
+
+func TestHookWithContext(t *testing.T) {
+	ctx := context.WithValue(context.Background(), myCtxKey{}, "my-custom-ctx-value")
+
+	buf := &bytes.Buffer{}
+	tee := io.TeeReader(buf, buf)
+	logger := New(WithOutput(buf), WithHookFunc(testHook))
+	logger.WithContext(ctx).Error("foobar")
+	assertLogEntryContains(t, tee, "my-custom-log-key", "my-custom-ctx-value")
+}
+
+func TestHookWithoutContext(t *testing.T) {
+	buf := &bytes.Buffer{}
+	tee := io.TeeReader(buf, buf)
+	logger := New(WithOutput(buf), WithHookFunc(testHook))
+	logger.Error("foobar")
+	assertLogEntryDoesNotHaveKey(t, tee, "my-custom-log-key")
+}
+
+func TestHookWithContext2(t *testing.T) {
+	ctx := context.WithValue(context.Background(), myCtxKey{}, "my-custom-ctx-value")
+
+	buf := &bytes.Buffer{}
+	tee := io.TeeReader(buf, buf)
+	logger := New(WithOutput(buf), WithHookFunc(testHook))
+	logger.WithContext(ctx).Error("foobar")
+	assertLogEntryContains(t, tee, "my-custom-log-key", "my-custom-ctx-value")
 }
