@@ -18,20 +18,14 @@ func ExampleInfo() {
 	logger.Warn("foobar")
 	logger.Info("i won't be logged because the default log level is higher than info")
 	logger.Error("foobar")
-	// Output: {"level":"warning","msg":"foobar","time":"2020-10-10T10:10:10Z"}
-	// {"level":"error","msg":"foobar","time":"2020-10-10T10:10:10Z"}
+	// Output: {"level":"warning","time":"2020-10-10T10:10:10Z","msg":"foobar"}
+	// {"level":"error","time":"2020-10-10T10:10:10Z","msg":"foobar"}
 }
 
 func ExampleWithLevel() {
 	logger := New(WithNowFunc(mockNowFunc), WithLevel(LevelInfo), WithReportCaller(false))
 	logger.Info("now log level is set to info or lower, I will be logged")
-	// Output: {"level":"info","msg":"now log level is set to info or lower, I will be logged","time":"2020-10-10T10:10:10Z"}
-}
-
-func ExampleWithLevelName() {
-	logger := New(WithNowFunc(mockNowFunc), WithLevelName("info"), WithReportCaller(false))
-	logger.Info("now log level is set to info or lower, I will be logged")
-	// Output: {"level":"info","msg":"now log level is set to info or lower, I will be logged","time":"2020-10-10T10:10:10Z"}
+	// Output: {"level":"info","time":"2020-10-10T10:10:10Z","msg":"now log level is set to info or lower, I will be logged"}
 }
 
 func ExampleWithFields() {
@@ -44,17 +38,17 @@ func ExampleWithFields() {
 	oldOutput := globalLogger.output
 	oldNowFunc := globalLogger.now
 	defer func() {
-		ConfigureGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc), WithReportCaller(true))
+		NewGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc), WithReportCaller(true), withAttemptedConsistentOrdering(false))
 	}()
-	ConfigureGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc), WithReportCaller(false))
+	NewGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc), WithReportCaller(false), withAttemptedConsistentOrdering(true))
 
 	WithFields(Fields{
 		"timeSpentOnConfiguration": 0,
 		"defaultsLoaded":           true,
 	}).Warn("use default logger with 0 configuration")
 	WithField("singleField", true).Warn("example with a single field")
-	// Output: {"defaultsLoaded":true,"level":"warning","msg":"use default logger with 0 configuration","time":"2020-10-10T10:10:10Z","timeSpentOnConfiguration":0}
-	// {"level":"warning","msg":"example with a single field","singleField":true,"time":"2020-10-10T10:10:10Z"}
+	// Output: {"level":"warning","time":"2020-10-10T10:10:10Z","msg":"use default logger with 0 configuration","defaultsLoaded":true,"timeSpentOnConfiguration":0}
+	// {"level":"warning","time":"2020-10-10T10:10:10Z","msg":"example with a single field","singleField":true}
 }
 
 func ExampleWithError() {
@@ -62,11 +56,11 @@ func ExampleWithError() {
 
 	err := errors.New("Test error")
 	logger.WithError(err).Error("Operation failed")
-	// Output: {"error":"Test error","level":"error","msg":"Operation failed","time":"2020-10-10T10:10:10Z"}
+	// Output: {"level":"error","time":"2020-10-10T10:10:10Z","msg":"Operation failed","error":"Test error"}
 }
 
 type warner interface {
-	Warn(args ...interface{})
+	Warn(msg string)
 }
 
 func funcThatAcceptsInterface(warner warner) {
@@ -77,10 +71,10 @@ func ExampleGlobal() {
 	oldOutput := globalLogger.output
 	oldNowFunc := globalLogger.now
 	defer func() {
-		ConfigureGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc), WithReportCaller(true))
+		NewGlobalLogger(WithOutput(oldOutput), WithNowFunc(oldNowFunc), WithReportCaller(true))
 	}()
-	ConfigureGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc), WithReportCaller(false))
+	NewGlobalLogger(WithOutput(os.Stdout), WithNowFunc(mockNowFunc), WithReportCaller(false))
 
 	funcThatAcceptsInterface(Global())
-	// Output: {"level":"warning","msg":"foobar","time":"2020-10-10T10:10:10Z"}
+	// Output: {"level":"warning","time":"2020-10-10T10:10:10Z","msg":"foobar"}
 }

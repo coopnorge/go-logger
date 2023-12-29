@@ -24,6 +24,7 @@ func WithNowFunc(nowFunc NowFunc) LoggerOption {
 }
 
 // WithOutput overrides default output the logs are written to.
+// Intended to be used in tests only.
 func WithOutput(output io.Writer) LoggerOption {
 	return LoggerOptionFunc(func(l *Logger) {
 		l.output = output
@@ -34,18 +35,6 @@ func WithOutput(output io.Writer) LoggerOption {
 func WithLevel(level Level) LoggerOption {
 	return LoggerOptionFunc(func(l *Logger) {
 		l.level = level
-	})
-}
-
-// WithLevelName sets minimum level for filtering logs by name
-func WithLevelName(level string) LoggerOption {
-	return LoggerOptionFunc(func(l *Logger) {
-		lvl, ok := LevelNameToLevel(level)
-		if !ok {
-			lvl = LevelWarn
-			l.Warn("Invalid log level, defaulting to Warn")
-		}
-		l.level = lvl
 	})
 }
 
@@ -64,6 +53,13 @@ func WithHookFunc(hook HookFunc) LoggerOption {
 // WithHook allows for connecting a hook to the logger, which will be triggered on all log-entries.
 func WithHook(hook Hook) LoggerOption {
 	return LoggerOptionFunc(func(l *Logger) {
-		l.logrusLogger.Hooks.Add(&customHook{hook: hook})
+		l.hooks = append(l.hooks, hook)
+	})
+}
+
+// withAttemptedConsistentOrdering attempts to keep the fields in the JSON-output in a certain order.
+func withAttemptedConsistentOrdering(enable bool) LoggerOption {
+	return LoggerOptionFunc(func(l *Logger) {
+		l.attemptConsistentOrdering = enable
 	})
 }

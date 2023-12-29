@@ -1,9 +1,7 @@
 package logger
 
 import (
-	"strings"
-
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap/zapcore"
 )
 
 // Level is an integer representation of the logging level
@@ -22,50 +20,20 @@ const (
 	LevelDebug
 )
 
-var nameMapping = map[string]Level{
-	"fatal": LevelFatal,
-	"error": LevelError,
-	"warn":  LevelWarn,
-	"info":  LevelInfo,
-	"debug": LevelDebug,
-}
-
-// LevelNameToLevel converts a named log level to the Level type
-func LevelNameToLevel(name string) (l Level, ok bool) {
-	l, ok = nameMapping[strings.ToLower(name)]
-	return
-}
-
-func mapLevelToLogrusLevel(l Level) logrus.Level {
+func mapLevelToZapLevel(l Level) zapcore.Level {
+	// Note that zapcore also has DPanicLevel and Panic level, but we don't expose those.
 	switch l {
 	case LevelFatal:
-		return logrus.FatalLevel
+		return zapcore.FatalLevel
 	case LevelError:
-		return logrus.ErrorLevel
+		return zapcore.ErrorLevel
 	case LevelWarn:
-		return logrus.WarnLevel
+		return zapcore.WarnLevel
 	case LevelInfo:
-		return logrus.InfoLevel
+		return zapcore.InfoLevel
 	case LevelDebug:
-		return logrus.DebugLevel
+		return zapcore.DebugLevel
 	}
 	// should never get here
-	return logrus.DebugLevel
-}
-
-func mapLogrusLevelToLevel(l logrus.Level) Level {
-	switch l {
-	case logrus.FatalLevel:
-		return LevelFatal
-	case logrus.ErrorLevel:
-		return LevelError
-	case logrus.WarnLevel:
-		return LevelWarn
-	case logrus.InfoLevel:
-		return LevelInfo
-	case logrus.DebugLevel:
-		return LevelDebug
-	}
-	// should never get here
-	return LevelDebug
+	return zapcore.DebugLevel
 }

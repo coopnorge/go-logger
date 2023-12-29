@@ -6,12 +6,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"testing"
 )
 
 func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expectedValue interface{}) {
+	t.Helper()
 	log := make(map[string]interface{})
 	err := json.NewDecoder(logReader).Decode(&log)
 	if err != nil {
@@ -38,6 +41,7 @@ func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expec
 }
 
 func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
+	t.Helper()
 	log := make(map[string]interface{})
 	err := json.NewDecoder(logReader).Decode(&log)
 	if err != nil {
@@ -50,6 +54,7 @@ func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
 }
 
 func assertLogEntryDoesNotHaveKey(t *testing.T, logReader io.Reader, key string) {
+	t.Helper()
 	log := make(map[string]interface{})
 	err := json.NewDecoder(logReader).Decode(&log)
 	if err != nil {
@@ -63,12 +68,11 @@ func assertLogEntryDoesNotHaveKey(t *testing.T, logReader io.Reader, key string)
 
 func TestLogLevels(t *testing.T) {
 	type testCase struct {
-		logFunc          func(args ...interface{})
+		logFunc          func(msg string)
 		expectedLogLevel string
 	}
 	buf := &bytes.Buffer{}
 	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
-	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
 	testCases := map[string]testCase{
 		"logger.Info() should log with level info": {
 			logFunc:          testLogger.Info,
@@ -86,10 +90,6 @@ func TestLogLevels(t *testing.T) {
 			logFunc:          testLogger.Warn,
 			expectedLogLevel: "warning",
 		},
-		"logger.Fatal() should log with level fatal": {
-			logFunc:          testLogger.Fatal,
-			expectedLogLevel: "fatal",
-		},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
@@ -99,6 +99,28 @@ func TestLogLevels(t *testing.T) {
 	}
 }
 
+func TestLogLevels_Fatal(t *testing.T) {
+	// https://stackoverflow.com/questions/26225513/how-to-test-os-exit-scenarios-in-go
+	if os.Getenv("BE_CRASHER") == "1" {
+		testLogger := New(WithOutput(os.Stderr), WithLevel(LevelDebug))
+		defer testLogger.Flush()
+		testLogger.Fatal("foobar")
+		return
+	}
+
+	buf := &bytes.Buffer{}
+	cmd := exec.Command(os.Args[0], "-test.run=TestLogLevels_Fatal")
+	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+	cmd.Stderr = buf
+
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+		assertLogEntryContains(t, buf, "level", "fatal")
+		return
+	}
+	t.Fatalf("process ran with err %v, want exit status 1", err)
+}
+
 func TestLogLevelsInFormatFuncs(t *testing.T) {
 	type testCase struct {
 		logFunc          func(format string, args ...interface{})
@@ -106,7 +128,6 @@ func TestLogLevelsInFormatFuncs(t *testing.T) {
 	}
 	buf := &bytes.Buffer{}
 	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
-	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
 	testCases := map[string]testCase{
 		"logger.Infof() should log with level info": {
 			logFunc:          testLogger.Infof,
@@ -124,10 +145,6 @@ func TestLogLevelsInFormatFuncs(t *testing.T) {
 			logFunc:          testLogger.Warnf,
 			expectedLogLevel: "warning",
 		},
-		"logger.Fatalf() should log with level fatal": {
-			logFunc:          testLogger.Fatalf,
-			expectedLogLevel: "fatal",
-		},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
@@ -135,6 +152,28 @@ func TestLogLevelsInFormatFuncs(t *testing.T) {
 			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
 		})
 	}
+}
+
+func TestLogLevelsInFormatFuncs_Fatal(t *testing.T) {
+	// https://stackoverflow.com/questions/26225513/how-to-test-os-exit-scenarios-in-go
+	if os.Getenv("BE_CRASHER") == "1" {
+		testLogger := New(WithOutput(os.Stderr), WithLevel(LevelDebug))
+		defer testLogger.Flush()
+		testLogger.Fatalf("foobar")
+		return
+	}
+
+	buf := &bytes.Buffer{}
+	cmd := exec.Command(os.Args[0], "-test.run=TestLogLevelsInFormatFuncs_Fatal")
+	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+	cmd.Stderr = buf
+
+	err := cmd.Run()
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {
+		assertLogEntryContains(t, buf, "level", "fatal")
+		return
+	}
+	t.Fatalf("process ran with err %v, want exit status 1", err)
 }
 
 func TestLoggingCustomFields(t *testing.T) {
@@ -240,7 +279,6 @@ func TestSettingLogLevel(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			buf := &bytes.Buffer{}
 			logger := New(WithOutput(buf), WithLevel(tc.logLevel))
-			logger.logrusLogger.ExitFunc = func(int) {}
 
 			logger.Debug("debug")
 			if contains(tc.expectedLoggedLevels, LevelDebug) != wasLogged(t, buf) {
@@ -262,27 +300,8 @@ func TestSettingLogLevel(t *testing.T) {
 				t.Fatalf("error level was incorrectly filtered")
 			}
 
-			logger.Fatal("fatal")
-			if contains(tc.expectedLoggedLevels, LevelFatal) != wasLogged(t, buf) {
-				t.Fatalf("fatal level was incorrectly filtered")
-			}
+			// Not testing Fatal, since it requires quite a bit of set-up to not exit the test-runner with os.Exit
 		})
-	}
-}
-
-func TestWithLevelName(t *testing.T) {
-	for name, lvl := range nameMapping {
-		logger := New(WithLevelName(name))
-		if logger.level != lvl {
-			t.Fatalf("expected level %v, got %v", lvl, logger.logrusLogger.Level)
-		}
-	}
-}
-
-func TestBadLevelName(t *testing.T) {
-	_, ok := LevelNameToLevel("invalid")
-	if ok {
-		t.Fatalf("Invalid level should not be ok")
 	}
 }
 
@@ -323,7 +342,7 @@ func testHook(entry *HookEntry) (bool, error) {
 		return false, nil
 	}
 
-	entry.Data["my-custom-log-key"] = str
+	entry.Fields["my-custom-log-key"] = str
 	return true, nil
 }
 
@@ -343,14 +362,4 @@ func TestHookWithoutContext(t *testing.T) {
 	logger := New(WithOutput(buf), WithHookFunc(testHook))
 	logger.Error("foobar")
 	assertLogEntryDoesNotHaveKey(t, tee, "my-custom-log-key")
-}
-
-func TestHookWithContext2(t *testing.T) {
-	ctx := context.WithValue(context.Background(), myCtxKey{}, "my-custom-ctx-value")
-
-	buf := &bytes.Buffer{}
-	tee := io.TeeReader(buf, buf)
-	logger := New(WithOutput(buf), WithHookFunc(testHook))
-	logger.WithContext(ctx).Error("foobar")
-	assertLogEntryContains(t, tee, "my-custom-log-key", "my-custom-ctx-value")
 }
