@@ -12,6 +12,7 @@ import (
 )
 
 func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expectedValue interface{}) {
+	t.Helper()
 	log := make(map[string]interface{})
 	err := json.NewDecoder(logReader).Decode(&log)
 	if err != nil {
@@ -38,6 +39,7 @@ func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expec
 }
 
 func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
+	t.Helper()
 	log := make(map[string]interface{})
 	err := json.NewDecoder(logReader).Decode(&log)
 	if err != nil {
@@ -50,6 +52,7 @@ func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
 }
 
 func assertLogEntryDoesNotHaveKey(t *testing.T, logReader io.Reader, key string) {
+	t.Helper()
 	log := make(map[string]interface{})
 	err := json.NewDecoder(logReader).Decode(&log)
 	if err != nil {

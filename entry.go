@@ -1,91 +1,101 @@
 package logger
 
 import (
-	"runtime"
-	"strings"
-	"sync"
+	"context"
+	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Entry represents a logging entry and all supported method we use
-type Entry interface {
-	Debugf(format string, args ...interface{})
-	Debug(args ...interface{})
-	Infof(format string, args ...interface{})
-	Info(args ...interface{})
-	Warnf(format string, args ...interface{})
-	Warn(args ...interface{})
-	Errorf(format string, args ...interface{})
-	Error(args ...interface{})
-	Fatalf(format string, args ...interface{})
-	Fatal(args ...interface{})
+type Entry struct {
+	logger    *Logger
+	timestamp time.Time
+	fields    Fields
+	context   context.Context
 }
 
-var (
-
-	// qualified package name, cached at first use
-	goLoggerPackage string
-
-	// Positions in the call stack when tracing to report the calling method
-	minimumCallerDepth int
-
-	// Used for caller information initialisation
-	callerInitOnce sync.Once
-)
-
-const (
-	maximumCallerDepth  int = 25
-	knownGoLoggerFrames int = 4
-)
-
-// getCaller retrieves the name of the first non-go-logger calling function
-func getCaller() *runtime.Frame {
-	// cache this package's fully-qualified name
-	callerInitOnce.Do(func() {
-		pcs := make([]uintptr, maximumCallerDepth)
-		_ = runtime.Callers(0, pcs)
-
-		// dynamic get the package name and the minimum caller depth
-		for i := 0; i < maximumCallerDepth; i++ {
-			funcName := runtime.FuncForPC(pcs[i]).Name()
-			if strings.Contains(funcName, "getCaller") {
-				goLoggerPackage = getPackageName(funcName)
-				break
-			}
-		}
-
-		minimumCallerDepth = knownGoLoggerFrames
-	})
-
-	// Restrict the lookback frames to avoid runaway lookups
-	pcs := make([]uintptr, maximumCallerDepth)
-	depth := runtime.Callers(minimumCallerDepth, pcs)
-	frames := runtime.CallersFrames(pcs[:depth])
-
-	for f, again := frames.Next(); again; f, again = frames.Next() {
-		pkg := getPackageName(f.Function)
-
-		// If the caller isn't part of this package, we're done
-		if pkg != goLoggerPackage {
-			return &f //nolint:scopelint
-		}
-	}
-
-	// if we got here, we failed to find the caller's context
-	return nil
+// WithError is a convenience wrapper for WithField("error", err)
+func (e *Entry) WithError(err error) *Entry {
+	return e.WithField(errorKey, err)
 }
 
-// getPackageName reduces a fully qualified function name to the package name
-// There really ought to be to be a better way...
-func getPackageName(f string) string {
-	for {
-		lastPeriod := strings.LastIndex(f, ".")
-		lastSlash := strings.LastIndex(f, "/")
-		if lastPeriod > lastSlash {
-			f = f[:lastPeriod]
-		} else {
-			break
-		}
-	}
+// WithField forwards a logging call with a field
+func (e *Entry) WithField(key string, value interface{}) *Entry {
+	e.fields[key] = value
+	return e
+}
 
-	return f
+// WithFields forwards a logging call with fields
+func (e *Entry) WithFields(fields Fields) *Entry {
+	for k, v := range fields {
+		e.fields[k] = v
+	}
+	return e
+}
+
+// WithContext sets the context for the log-message. Useful when using hooks.
+func (e *Entry) WithContext(ctx context.Context) *Entry {
+	e.context = ctx
+	return e
+}
+
+// Info forwards a logging call in the (format, args) format
+func (e *Entry) Info(args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Info(args...)
+}
+
+// Infof forwards a logging call in the (format, args) format
+func (e *Entry) Infof(format string, args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Infof(format, args...)
+}
+
+// Error forwards an error logging call
+func (e *Entry) Error(args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Error(args...)
+}
+
+// Errorf forwards an error logging call
+func (e *Entry) Errorf(format string, args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Errorf(format, args...)
+}
+
+// Debug forwards a debugging logging call
+func (e *Entry) Debug(args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Debug(args...)
+}
+
+// Debugf forwards a debugging logging call
+func (e *Entry) Debugf(format string, args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Debugf(format, args...)
+}
+
+// Warn forwards a warning logging call
+func (e *Entry) Warn(args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Warn(args...)
+}
+
+// Warnf forwards a warning logging call
+func (e *Entry) Warnf(format string, args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Warnf(format, args...)
+}
+
+// Fatal forwards a fatal logging call
+func (e *Entry) Fatal(args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Fatal(args...)
+}
+
+// Fatalf forwards a fatal logging call
+func (e *Entry) Fatalf(format string, args ...interface{}) {
+	logrusFields := logrus.Fields(e.fields)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Fatalf(format, args...)
 }

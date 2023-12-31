@@ -2,6 +2,8 @@ package logger
 
 import (
 	"bytes"
+	"context"
+	"fmt"
 	"testing"
 )
 
@@ -123,4 +125,71 @@ func TestGlobalLoggerConvenienveFunctions(t *testing.T) {
 	SetLevel(LevelInfo)
 	Info("but now I will")
 	assertLogEntryContains(t, buf, "msg", "but now I will")
+}
+
+func TestChainingSetup(t *testing.T) {
+	buf := &bytes.Buffer{}
+	oldOutput := globalLogger.output
+	oldLevel := globalLogger.level
+	oldNowFunc := globalLogger.now
+	defer func() {
+		// bring global logger to original state after tests
+		ConfigureGlobalLogger(WithOutput(oldOutput), WithLevel(oldLevel), WithNowFunc(oldNowFunc))
+	}()
+	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelDebug), WithNowFunc(mockNowFunc), WithHookFunc(testHook))
+
+	ctx := context.WithValue(context.Background(), myCtxKey{}, "my-custom-ctx-value")
+	err := fmt.Errorf("some error")
+
+	{
+		// Start with global WithField
+		WithField("foo", "bar").WithContext(ctx).WithFields(Fields{"baz": "quoo", "number": 42}).WithError(err).Infof("hello %s", "world")
+		b := buf.Bytes() // get bytes for multiple-reads
+		buf.Reset()      // Prepare for next log message
+
+		assertLogEntryContains(t, bytes.NewReader(b), "msg", "hello world")
+		assertLogEntryContains(t, bytes.NewReader(b), "foo", "bar")
+		assertLogEntryContains(t, bytes.NewReader(b), "my-custom-log-key", "my-custom-ctx-value")
+		assertLogEntryContains(t, bytes.NewReader(b), "baz", "quoo")
+		assertLogEntryContains(t, bytes.NewReader(b), "number", float64(42))
+	}
+
+	{
+		// Start with global WithFields
+		WithFields(Fields{"baz": "quoo", "number": 42}).WithField("foo", "bar").WithContext(ctx).WithError(err).Infof("hello %s", "world")
+		b := buf.Bytes() // get bytes for multiple-reads
+		buf.Reset()      // Prepare for next log message
+
+		assertLogEntryContains(t, bytes.NewReader(b), "msg", "hello world")
+		assertLogEntryContains(t, bytes.NewReader(b), "foo", "bar")
+		assertLogEntryContains(t, bytes.NewReader(b), "my-custom-log-key", "my-custom-ctx-value")
+		assertLogEntryContains(t, bytes.NewReader(b), "baz", "quoo")
+		assertLogEntryContains(t, bytes.NewReader(b), "number", float64(42))
+	}
+
+	{
+		// Start with global WithError
+		WithError(err).WithFields(Fields{"baz": "quoo", "number": 42}).WithField("foo", "bar").WithContext(ctx).Infof("hello %s", "world")
+		b := buf.Bytes() // get bytes for multiple-reads
+		buf.Reset()      // Prepare for next log message
+
+		assertLogEntryContains(t, bytes.NewReader(b), "msg", "hello world")
+		assertLogEntryContains(t, bytes.NewReader(b), "foo", "bar")
+		assertLogEntryContains(t, bytes.NewReader(b), "my-custom-log-key", "my-custom-ctx-value")
+		assertLogEntryContains(t, bytes.NewReader(b), "baz", "quoo")
+		assertLogEntryContains(t, bytes.NewReader(b), "number", float64(42))
+	}
+
+	{
+		// Start with global WithContext
+		WithContext(ctx).WithError(err).WithFields(Fields{"baz": "quoo", "number": 42}).WithField("foo", "bar").Infof("hello %s", "world")
+		b := buf.Bytes() // get bytes for multiple-reads
+		buf.Reset()      // Prepare for next log message
+
+		assertLogEntryContains(t, bytes.NewReader(b), "msg", "hello world")
+		assertLogEntryContains(t, bytes.NewReader(b), "foo", "bar")
+		assertLogEntryContains(t, bytes.NewReader(b), "my-custom-log-key", "my-custom-ctx-value")
+		assertLogEntryContains(t, bytes.NewReader(b), "baz", "quoo")
+		assertLogEntryContains(t, bytes.NewReader(b), "number", float64(42))
+	}
 }
