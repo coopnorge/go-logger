@@ -64,6 +64,6 @@ func WithHookFunc(hook HookFunc) LoggerOption {
 // WithHook allows for connecting a hook to the logger, which will be triggered on all log-entries.
 func WithHook(hook Hook) LoggerOption {
 	return LoggerOptionFunc(func(l *Logger) {
-		l.logrusLogger.Hooks.Add(&customHook{hook: hook})
+		l.logrusLogger.Hooks.Add(&logrusHook{hook: hook})
 	})
 }
