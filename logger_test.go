@@ -348,12 +348,28 @@ func TestHookWithoutContext(t *testing.T) {
 	assertLogEntryDoesNotHaveKey(t, tee, "my-custom-log-key")
 }
 
-func TestHookWithContext2(t *testing.T) {
-	ctx := context.WithValue(context.Background(), myCtxKey{}, "my-custom-ctx-value")
+func TestReuseEntry(t *testing.T) {
+	builder := &strings.Builder{}
+	logger := New(WithOutput(builder), WithLevel(LevelInfo))
+	withFields := logger.WithField("foo", "bar")
+	withFields.Info("quoo")
+	withFields.Error("baz")
 
-	buf := &bytes.Buffer{}
-	tee := io.TeeReader(buf, buf)
-	logger := New(WithOutput(buf), WithHookFunc(testHook))
-	logger.WithContext(ctx).Error("foobar")
-	assertLogEntryContains(t, tee, "my-custom-log-key", "my-custom-ctx-value")
+	str := builder.String()
+	lines := strings.Split(str, "\n")
+	if len(lines) != 3 {
+		// Info + Error + empty newline
+		t.Fatalf("expected %d lines, got %d", 3, len(lines))
+	}
+	if lines[2] != "" {
+		t.Fatalf("expected last line to be empty, got %s", lines[2])
+	}
+
+	assertLogEntryContains(t, strings.NewReader(lines[0]), "foo", "bar")
+	assertLogEntryContains(t, strings.NewReader(lines[0]), "msg", "quoo")
+	assertLogEntryContains(t, strings.NewReader(lines[0]), "level", "info")
+
+	assertLogEntryContains(t, strings.NewReader(lines[1]), "foo", "bar")
+	assertLogEntryContains(t, strings.NewReader(lines[1]), "msg", "baz")
+	assertLogEntryContains(t, strings.NewReader(lines[1]), "level", "error")
 }
