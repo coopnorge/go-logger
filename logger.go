@@ -56,7 +56,7 @@ func (logger *Logger) entry() *Entry {
 		fields["function"] = frame.Function
 	}
 
-	return &Entry{logger: logger, timestamp: logger.now(), fields: fields}
+	return &Entry{logger: logger, fields: fields}
 }
 
 const errorKey = "error"

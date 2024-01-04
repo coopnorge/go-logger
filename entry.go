@@ -2,17 +2,15 @@ package logger
 
 import (
 	"context"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 // Entry represents a logging entry and all supported method we use
 type Entry struct {
-	logger    *Logger
-	timestamp time.Time
-	fields    Fields
-	context   context.Context
+	logger  *Logger
+	fields  Fields
+	context context.Context
 }
 
 // WithError is a convenience wrapper for WithField("error", err)
@@ -43,59 +41,59 @@ func (e *Entry) WithContext(ctx context.Context) *Entry {
 // Info forwards a logging call in the (format, args) format
 func (e *Entry) Info(args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Info(args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Info(args...)
 }
 
 // Infof forwards a logging call in the (format, args) format
 func (e *Entry) Infof(format string, args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Infof(format, args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Infof(format, args...)
 }
 
 // Error forwards an error logging call
 func (e *Entry) Error(args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Error(args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Error(args...)
 }
 
 // Errorf forwards an error logging call
 func (e *Entry) Errorf(format string, args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Errorf(format, args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Errorf(format, args...)
 }
 
 // Debug forwards a debugging logging call
 func (e *Entry) Debug(args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Debug(args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Debug(args...)
 }
 
 // Debugf forwards a debugging logging call
 func (e *Entry) Debugf(format string, args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Debugf(format, args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Debugf(format, args...)
 }
 
 // Warn forwards a warning logging call
 func (e *Entry) Warn(args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Warn(args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Warn(args...)
 }
 
 // Warnf forwards a warning logging call
 func (e *Entry) Warnf(format string, args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Warnf(format, args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Warnf(format, args...)
 }
 
 // Fatal forwards a fatal logging call
 func (e *Entry) Fatal(args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Fatal(args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Fatal(args...)
 }
 
 // Fatalf forwards a fatal logging call
 func (e *Entry) Fatalf(format string, args ...interface{}) {
 	logrusFields := logrus.Fields(e.fields)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.timestamp).WithFields(logrusFields).Fatalf(format, args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Fatalf(format, args...)
 }
