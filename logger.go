@@ -48,36 +48,37 @@ func New(opts ...LoggerOption) *Logger {
 	return logger
 }
 
-func (logger *Logger) entry() Entry {
-	fields := logrus.Fields{}
+func (logger *Logger) entry() *Entry {
+	fields := Fields{}
 	if logger.reportCaller {
 		frame := getCaller()
 		fields["file"] = fmt.Sprintf("%s:%v", frame.File, frame.Line)
 		fields["function"] = frame.Function
 	}
-	return logger.logrusLogger.WithTime(logger.now()).WithFields(fields)
+
+	return &Entry{logger: logger, fields: fields}
 }
 
 const errorKey = "error"
 
 // WithError is a convenience wrapper for WithField("error", err)
-func (logger *Logger) WithError(err error) Entry {
+func (logger *Logger) WithError(err error) *Entry {
 	return logger.WithField(errorKey, err)
 }
 
 // WithField forwards a logging call with a field
-func (logger *Logger) WithField(key string, value interface{}) Entry {
-	return logger.logrusLogger.WithTime(logger.now()).WithField(key, value)
+func (logger *Logger) WithField(key string, value interface{}) *Entry {
+	return logger.entry().WithField(key, value)
 }
 
 // WithFields forwards a logging call with fields
-func (logger *Logger) WithFields(fields Fields) Entry {
-	return logger.logrusLogger.WithTime(logger.now()).WithFields(logrus.Fields(fields))
+func (logger *Logger) WithFields(fields Fields) *Entry {
+	return logger.entry().WithFields(fields)
 }
 
 // WithContext forwards a logging call with fields
-func (logger *Logger) WithContext(ctx context.Context) Entry {
-	return logger.logrusLogger.WithTime(logger.now()).WithContext(ctx)
+func (logger *Logger) WithContext(ctx context.Context) *Entry {
+	return logger.entry().WithContext(ctx)
 }
 
 // OutputHandler returns logger output handler

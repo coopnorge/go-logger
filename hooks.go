@@ -35,17 +35,17 @@ type HookEntry struct {
 	Context context.Context
 }
 
-type customHook struct {
+type logrusHook struct {
 	hook Hook
 }
 
 // Levels implements the logrus.Hook interface.
-func (h *customHook) Levels() []logrus.Level {
+func (h *logrusHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
 
 // Fire implements the logrus.Hook interface.
-func (h *customHook) Fire(entry *logrus.Entry) error {
+func (h *logrusHook) Fire(entry *logrus.Entry) error {
 	// Provide all entry-data so the hook can mutate them.
 	hookEntry := &HookEntry{
 		Data:    Fields(entry.Data),
