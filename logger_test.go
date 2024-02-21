@@ -373,3 +373,41 @@ func TestReuseEntry(t *testing.T) {
 	assertLogEntryContains(t, strings.NewReader(lines[1]), "msg", "baz")
 	assertLogEntryContains(t, strings.NewReader(lines[1]), "level", "error")
 }
+
+func TestReuseEntryWithFields(t *testing.T) {
+	// This test asserts that entry.WithField(...) does mutate the entry itself
+	builder := &strings.Builder{}
+	logger := New(WithOutput(builder), WithLevel(LevelInfo))
+	entryWithFields := logger.WithField("foo", "bar")
+	entryWithFields.WithField("only-quoo", true).Info("quoo")
+	entryWithFields.WithError(fmt.Errorf("only-baz")).Error("baz")
+	entryWithFields.Info("final")
+
+	str := builder.String()
+	lines := strings.Split(str, "\n")
+	if len(lines) != 4 {
+		// Info + Error + empty newline
+		t.Fatalf("expected %d lines, got %d", 4, len(lines))
+	}
+	if lines[3] != "" {
+		t.Fatalf("expected last line to be empty, got %s", lines[3])
+	}
+
+	assertLogEntryContains(t, strings.NewReader(lines[0]), "foo", "bar")
+	assertLogEntryContains(t, strings.NewReader(lines[0]), "msg", "quoo")
+	assertLogEntryContains(t, strings.NewReader(lines[0]), "level", "info")
+	assertLogEntryContains(t, strings.NewReader(lines[0]), "only-quoo", true)
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(lines[0]), "error")
+
+	assertLogEntryContains(t, strings.NewReader(lines[1]), "foo", "bar")
+	assertLogEntryContains(t, strings.NewReader(lines[1]), "msg", "baz")
+	assertLogEntryContains(t, strings.NewReader(lines[1]), "level", "error")
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(lines[1]), "only-quoo")
+	assertLogEntryContains(t, strings.NewReader(lines[1]), "error", "only-baz")
+
+	assertLogEntryContains(t, strings.NewReader(lines[2]), "foo", "bar")
+	assertLogEntryContains(t, strings.NewReader(lines[2]), "msg", "final")
+	assertLogEntryContains(t, strings.NewReader(lines[2]), "level", "info")
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(lines[2]), "only-quoo")
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(lines[2]), "error")
+}

@@ -20,22 +20,28 @@ func (e *Entry) WithError(err error) *Entry {
 
 // WithField forwards a logging call with a field
 func (e *Entry) WithField(key string, value interface{}) *Entry {
-	e.fields[key] = value
-	return e
+	return e.WithFields(Fields{key: value})
 }
 
 // WithFields forwards a logging call with fields
 func (e *Entry) WithFields(fields Fields) *Entry {
-	for k, v := range fields {
-		e.fields[k] = v
+	// Make a copy, to prevent mutation of the old entry
+	newFields := make(Fields, len(e.fields)+len(fields))
+	// Copy old fields
+	for k, v := range e.fields {
+		newFields[k] = v
 	}
-	return e
+	// Set new fields
+	for k, v := range fields {
+		newFields[k] = v
+	}
+	return &Entry{logger: e.logger, fields: newFields, context: e.context}
 }
 
 // WithContext sets the context for the log-message. Useful when using hooks.
 func (e *Entry) WithContext(ctx context.Context) *Entry {
-	e.context = ctx
-	return e
+	// Make a copy, to prevent mutation of the old entry
+	return &Entry{logger: e.logger, fields: e.fields, context: ctx}
 }
 
 // Info forwards a logging call in the (format, args) format
