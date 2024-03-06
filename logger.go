@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"os"
 	"time"
@@ -49,14 +48,7 @@ func New(opts ...LoggerOption) *Logger {
 }
 
 func (logger *Logger) entry() *Entry {
-	fields := Fields{}
-	if logger.reportCaller {
-		frame := getCaller()
-		fields["file"] = fmt.Sprintf("%s:%v", frame.File, frame.Line)
-		fields["function"] = frame.Function
-	}
-
-	return &Entry{logger: logger, fields: fields}
+	return &Entry{logger: logger, fields: Fields{}}
 }
 
 const errorKey = "error"
