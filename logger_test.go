@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -36,6 +37,35 @@ func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expec
 			t.Fatalf("expected log[%v] to have value: %v, got: %v", key, expected, v)
 		}
 	}
+}
+
+func getLineNumber(t *testing.T, logReader io.Reader) int {
+	const key = "file"
+	t.Helper()
+	log := make(map[string]any)
+	err := json.NewDecoder(logReader).Decode(&log)
+	if err != nil {
+		t.Fatalf("cannot decode log entry: %v", err)
+	}
+	vAny, ok := log[key]
+	if !ok {
+		t.Fatalf("no value found for key %v", key)
+	}
+	v, ok := vAny.(string)
+	if !ok {
+		t.Fatalf("value in key %v was not string: %v", key, vAny)
+	}
+	r := regexp.MustCompile(`.*\.go:(\d+)$`)
+	matches := r.FindStringSubmatch(v)
+	if len(matches) != 2 {
+		// matches will first match the full string, and the second match is the line-number
+		t.Fatalf("log[%v]=%v does not match regexp", key, v)
+	}
+	i, err := strconv.Atoi(matches[1])
+	if err != nil {
+		t.Fatalf("log[%v]=%v failed to parse to int", key, v)
+	}
+	return i
 }
 
 func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
@@ -289,13 +319,67 @@ func TestBadLevelName(t *testing.T) {
 	}
 }
 
-func TestReporingCaller(t *testing.T) {
-	buf := &bytes.Buffer{}
-	tee := io.TeeReader(buf, buf)
-	logger := New(WithOutput(buf))
+func TestReportingCaller(t *testing.T) {
+	builder := &strings.Builder{}
+	logger := New(WithOutput(builder), WithLevel(LevelInfo))
+	reportCallerInGoLoggerPackage = true
+
+	// Simple log
 	logger.Error("foobar")
-	assertLogEntryContains(t, tee, "file", regexp.MustCompile(`.*\.go:\d+$`))
-	assertLogEntryHasKey(t, tee, "function")
+
+	// 2 logs from same entry
+	entry := logger.WithField("foo", "bar")
+	entry.Info("first")
+	entry.Error("second")
+
+	result := strings.TrimSpace(builder.String()) // Trim trailing newline
+	lines := strings.Split(result, "\n")
+
+	if len(lines) != 3 {
+		t.Fatalf("expected %d lines, got %d", 3, len(lines))
+	}
+
+	lineNumbers := make([]int, 0, 3)
+
+	{
+		line := lines[0]
+		assertLogEntryContains(t, strings.NewReader(line), "file", regexp.MustCompile(`.*\.go:\d+$`))
+		assertLogEntryHasKey(t, strings.NewReader(line), "function")
+		lineNumbers = append(lineNumbers, getLineNumber(t, strings.NewReader(line)))
+	}
+
+	{
+		line := lines[1]
+		assertLogEntryContains(t, strings.NewReader(line), "file", regexp.MustCompile(`.*\.go:\d+$`))
+		assertLogEntryHasKey(t, strings.NewReader(line), "function")
+		lineNumbers = append(lineNumbers, getLineNumber(t, strings.NewReader(line)))
+	}
+	{
+		line := lines[2]
+		assertLogEntryContains(t, strings.NewReader(line), "file", regexp.MustCompile(`.*\.go:\d+$`))
+		assertLogEntryHasKey(t, strings.NewReader(line), "function")
+		lineNumbers = append(lineNumbers, getLineNumber(t, strings.NewReader(line)))
+	}
+
+	uniqueLineNumber := unique(lineNumbers)
+	if len(lineNumbers) != len(uniqueLineNumber) {
+		t.Fatalf("expected %d unique line-numbers, got %d. All line-numbers: %#v", len(lineNumbers), len(uniqueLineNumber), lineNumbers)
+	}
+}
+
+// Get unique items in slice
+func unique[T comparable](slice []T) []T {
+	m := make(map[T]struct{}, len(slice))
+
+	for _, v := range slice {
+		m[v] = struct{}{}
+	}
+
+	u := make([]T, 0, len(m))
+	for k := range m {
+		u = append(u, k)
+	}
+	return u
 }
 
 func TestDisableReportingCaller(t *testing.T) {

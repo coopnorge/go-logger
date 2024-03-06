@@ -14,6 +14,9 @@ var (
 	// Positions in the call stack when tracing to report the calling method
 	minimumCallerDepth int
 
+	// Used for reporting the line-number inside the go-logger package, used for testing.
+	reportCallerInGoLoggerPackage bool
+
 	// Used for caller information initialisation
 	callerInitOnce sync.Once
 )
@@ -47,13 +50,18 @@ func getCaller() *runtime.Frame {
 	depth := runtime.Callers(minimumCallerDepth, pcs)
 	frames := runtime.CallersFrames(pcs[:depth])
 
+	var prev runtime.Frame
 	for f, again := frames.Next(); again; f, again = frames.Next() {
 		pkg := getPackageName(f.Function)
 
 		// If the caller isn't part of this package, we're done
 		if pkg != goLoggerPackage {
+			if reportCallerInGoLoggerPackage {
+				return &prev
+			}
 			return &f //nolint:scopelint
 		}
+		prev = f
 	}
 
 	// if we got here, we failed to find the caller's context
