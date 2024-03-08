@@ -14,11 +14,28 @@ type LoggerKratosAdapter struct {
 }
 
 // NewLoggerKratosAdapter Coop logger adapter for Go-Kratos.
+//
+// Example:
+//
+//	package main
+//
+//	import (
+//		"github.com/coopnorge/go-logger"
+//		"github.com/go-kratos/kratos/v2/log"
+//	)
+//
+//	func main() {
+//		// Create a Coop logger
+//		logger.ConfigureGlobalLogger(logger.WithLevel(logger.LevelDebug), logger.WithHook(tracelogger.NewHook()))
+//
+//		// Create a LoggerKratosAdapter and pass it to Go-Kratos so it will know what adapter of logger to use.
+//		log.SetLogger(logs.NewLoggerKratosAdapter(logger.Global()))
+//	}
 func NewLoggerKratosAdapter(coopLog *logger.Logger) *LoggerKratosAdapter {
 	return &LoggerKratosAdapter{log: coopLog}
 }
 
-// Log print the keyValPairs to log.
+// Log prints the keyValPairs to the log.
 func (l *LoggerKratosAdapter) Log(level log.Level, keyValPairs ...interface{}) error {
 	if len(keyValPairs) == 0 {
 		return nil
