@@ -1,19 +1,19 @@
 package logs
 
 import (
-	"github.com/coopnorge/go-logger"
+	coopLog "github.com/coopnorge/go-logger"
 	"github.com/go-kratos/kratos/v2/log"
 )
 
 // Ensure LoggerKratosAdapter implements the log.Logger interface.
 var _ log.Logger = (*LoggerKratosAdapter)(nil)
 
-// LoggerKratosAdapter Adapter for Go-Kratos.
+// LoggerKratosAdapter adapter for Go-Kratos.
 type LoggerKratosAdapter struct {
-	log *logger.Logger
+	log *coopLog.Logger
 }
 
-// NewLoggerKratosAdapter Coop logger adapter for Go-Kratos.
+// NewLoggerKratosAdapter constructor that accepting Coop logger adapter for Go-Kratos.
 //
 // Example:
 //
@@ -25,17 +25,23 @@ type LoggerKratosAdapter struct {
 //	)
 //
 //	func main() {
-//		// Create a Coop logger
+//		// Create a Coop logger.
 //		logger.ConfigureGlobalLogger(logger.WithLevel(logger.LevelDebug), logger.WithHook(tracelogger.NewHook()))
 //
 //		// Create a LoggerKratosAdapter and pass it to Go-Kratos so it will know what adapter of logger to use.
 //		log.SetLogger(logs.NewLoggerKratosAdapter(logger.Global()))
 //	}
-func NewLoggerKratosAdapter(coopLog *logger.Logger) *LoggerKratosAdapter {
+func NewLoggerKratosAdapter(coopLog *coopLog.Logger) *LoggerKratosAdapter {
 	return &LoggerKratosAdapter{log: coopLog}
 }
 
 // Log prints the keyValPairs to the log.
+//
+// Example of logs:
+//
+// {"file":"/project/internal/pkg/logs/kratos.go:36","function":"xxx","level":"debug","msg":"msgconfig loaded: MY_ENV format: ","time":"2000-03-08T10:49:12Z"}
+//
+// {"file":"/project/internal/pkg/logs/kratos.go:34","function":"xxx","level":"info","msg":"I'm godoc example message","time":"2000-03-08T10:49:12Z"}
 func (l *LoggerKratosAdapter) Log(level log.Level, keyValPairs ...interface{}) error {
 	if len(keyValPairs) == 0 {
 		return nil
@@ -43,15 +49,15 @@ func (l *LoggerKratosAdapter) Log(level log.Level, keyValPairs ...interface{}) e
 
 	switch level {
 	case log.LevelFatal:
-		logger.Fatal(keyValPairs...)
+		coopLog.Fatal(keyValPairs...)
 	case log.LevelError:
-		logger.Error(keyValPairs...)
+		coopLog.Error(keyValPairs...)
 	case log.LevelWarn:
-		logger.Warn(keyValPairs...)
+		coopLog.Warn(keyValPairs...)
 	case log.LevelInfo:
-		logger.Info(keyValPairs...)
+		coopLog.Info(keyValPairs...)
 	default:
-		logger.Debug(keyValPairs...)
+		coopLog.Debug(keyValPairs...)
 	}
 
 	return nil

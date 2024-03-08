@@ -3,13 +3,13 @@ package logs
 import (
 	"testing"
 
-	"github.com/coopnorge/go-logger"
+	coopLog "github.com/coopnorge/go-logger"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTestLoggerKratosAdapterEmptyLog(t *testing.T) {
-	coopLogger := logger.New(logger.WithLevel(logger.LevelDebug))
+	coopLogger := coopLog.New(coopLog.WithLevel(coopLog.LevelDebug))
 	loggerAdapter := NewLoggerKratosAdapter(coopLogger)
 
 	logErr := loggerAdapter.Log(log.LevelWarn)
@@ -17,7 +17,6 @@ func TestTestLoggerKratosAdapterEmptyLog(t *testing.T) {
 }
 
 func TestLoggerKratosAdapterLevels(t *testing.T) {
-	// Test logging levels
 	tests := []struct {
 		level log.Level
 	}{
@@ -29,7 +28,7 @@ func TestLoggerKratosAdapterLevels(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.level.String(), func(t *testing.T) {
-			coopLogger := logger.New(logger.WithLevel(logger.LevelDebug))
+			coopLogger := coopLog.New(coopLog.WithLevel(coopLog.LevelDebug))
 			loggerAdapter := NewLoggerKratosAdapter(coopLogger)
 
 			logErr := loggerAdapter.Log(test.level, "test message")
