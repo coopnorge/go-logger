@@ -6,7 +6,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.7.2
 	github.com/labstack/gommon v0.4.2
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
