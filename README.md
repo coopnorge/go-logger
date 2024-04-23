@@ -116,3 +116,26 @@ func main() {
 	}
 }
 ```
+
+### Datadog
+
+To ensure that Datadog outputs logs in the correct format Datadog must be
+configured with a custom logger.
+
+```go
+package main
+
+import (
+	"github.com/coopnorge/go-logger/adapter/datadog"
+
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
+)
+
+func main() {
+	l, err =: datadog.NewLogger(datadog.WithGlobalLogger())
+	if err != nil {
+		panic(err)
+	}
+	ddtrace.UseLogger(l)
+}
+```
