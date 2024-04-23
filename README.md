@@ -85,3 +85,34 @@ func main() {
 	// {"level":"warning","msg":"and this will be logged too","time":"2022-02-17T10:54:54+01:00"}
 }
 ```
+
+## Adapters
+
+### Gorm
+
+To ensure that Gorm outputs logs in the correct format Gorm must be configured
+with a [custom logger](https://gorm.io/docs/logger.html#Customize-Logger).
+
+```go
+package main
+
+import (
+	gormLogger "github.com/coopnorge/go-logger/adapter/gorm"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+func main() {
+	l, err =: gormLogger.NewLogger(gormLogger.WithGlobalLogger())
+	if err != nil {
+		panic(err)
+	}
+	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
+		Logger: l,
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+```
