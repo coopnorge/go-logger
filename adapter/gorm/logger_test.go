@@ -46,21 +46,6 @@ func TestGlobalLogger(t *testing.T) {
 	output.Reset()
 	logger.Error(ctx, "This is a test")
 	assert.Contains(t, output.String(), "This is a test")
-
-	output.Reset()
-	fc := func() (sql string, rowsAffected int64) {
-		return "SQL STATEMENT", 10
-	}
-	logger.Trace(ctx, time.Now(), fc, nil)
-	assert.Contains(t, output.String(), "\"rows\":10")
-
-	output.Reset()
-	fc = func() (sql string, rowsAffected int64) {
-		return "SQL STATEMENT", 0
-	}
-	logger.Trace(ctx, time.Now(), fc, errors.New("This is a test"))
-	assert.Contains(t, output.String(), "\"rows\":0")
-	assert.Contains(t, output.String(), "This is a test")
 }
 
 func TestCustomLogger(t *testing.T) {
@@ -81,6 +66,39 @@ func TestCustomLogger(t *testing.T) {
 	output.Reset()
 	logger.Error(ctx, "This is a test")
 	assert.Contains(t, output.String(), "This is a test")
+}
+
+func TestTraceDisabled(t *testing.T) {
+	ctx := context.Background()
+
+	output := &strings.Builder{}
+	logger, err := NewLogger(WithLogger(coopLogger.New(coopLogger.WithLevel(coopLogger.LevelDebug), coopLogger.WithOutput(output))))
+	require.NoError(t, err)
+
+	output.Reset()
+	fc := func() (sql string, rowsAffected int64) {
+		return "SQL STATEMENT", 10
+	}
+	logger.Trace(ctx, time.Now(), fc, nil)
+	assert.Equal(t, output.String(), "")
+
+	output.Reset()
+	fc = func() (sql string, rowsAffected int64) {
+		return "SQL STATEMENT", 0
+	}
+	logger.Trace(ctx, time.Now(), fc, errors.New("This is a test"))
+	assert.Equal(t, output.String(), "")
+}
+
+func TestTraceEnabled(t *testing.T) {
+	ctx := context.Background()
+
+	output := &strings.Builder{}
+	logger, err := NewLogger(
+		WithLogger(coopLogger.New(coopLogger.WithLevel(coopLogger.LevelDebug), coopLogger.WithOutput(output))),
+		WithSQLTrace(),
+	)
+	require.NoError(t, err)
 
 	output.Reset()
 	fc := func() (sql string, rowsAffected int64) {
