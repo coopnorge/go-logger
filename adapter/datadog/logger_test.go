@@ -28,10 +28,10 @@ func TestGlobalLogger(t *testing.T) {
 		level string
 		msg   string
 	}{
-		{"error", "Datadog Tracer v1.63.0 ERROR This is a test"},
-		{"warning", "Datadog Tracer v1.63.0 WARN This is a test"},
-		{"info", "Datadog Tracer v1.63.0 INFO This is a test"},
-		{"debug", "Datadog Tracer v1.63.0 DEBUG This is a test"},
+		{"error", "Datadog Tracer v1.63.0 ERROR: This is a test"},
+		{"warning", "Datadog Tracer v1.63.0 WARN: This is a test"},
+		{"info", "Datadog Tracer v1.63.0 INFO: This is a test"},
+		{"debug", "Datadog Tracer v1.63.0 DEBUG: This is a test"},
 		{"warning", "Datadog Tracer v1.63.0 This is a test for fallback level"},
 	}
 	for _, test := range tests {
@@ -53,10 +53,10 @@ func TestCustomLogger(t *testing.T) {
 		level string
 		msg   string
 	}{
-		{"error", "Datadog Tracer v1.63.0 ERROR This is a test"},
-		{"warning", "Datadog Tracer v1.63.0 WARN This is a test"},
-		{"info", "Datadog Tracer v1.63.0 INFO This is a test"},
-		{"debug", "Datadog Tracer v1.63.0 DEBUG This is a test"},
+		{"error", "Datadog Tracer v1.63.0 ERROR: This is a test"},
+		{"warning", "Datadog Tracer v1.63.0 WARN: This is a test"},
+		{"info", "Datadog Tracer v1.63.0 INFO: This is a test"},
+		{"debug", "Datadog Tracer v1.63.0 DEBUG: This is a test"},
 		{"warning", "Datadog Tracer v1.63.0 This is a test for fallback level"},
 	}
 	for _, test := range tests {

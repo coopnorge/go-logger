@@ -44,19 +44,19 @@ func NewLogger(opts ...LoggerOption) (*Logger, error) {
 func (l *Logger) Log(msg string) {
 	// Logs from gopkg.in/DataDog/dd-trace-go.v1/ddtrace will contain keywords
 	// specifying the level of the log.
-	if strings.Contains(msg, "ERROR") {
+	if strings.Contains(msg, "ERROR: ") {
 		l.instance.Error(msg)
 		return
 	}
-	if strings.Contains(msg, "WARN") {
+	if strings.Contains(msg, "WARN: ") {
 		l.instance.Warn(msg)
 		return
 	}
-	if strings.Contains(msg, "INFO") {
+	if strings.Contains(msg, "INFO: ") {
 		l.instance.Info(msg)
 		return
 	}
-	if strings.Contains(msg, "DEBUG") {
+	if strings.Contains(msg, "DEBUG: ") {
 		l.instance.Debug(msg)
 		return
 	}
