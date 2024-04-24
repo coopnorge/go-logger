@@ -29,7 +29,7 @@ type Logger struct {
 //	)
 //
 //	func main() {
-//		l, err =: gormLogger.NewLogger(gormLogger.WithGlobalLogger())
+//		l, err := gormLogger.NewLogger(gormLogger.WithGlobalLogger())
 //		if err != nil {
 //			panic(err)
 //		}
