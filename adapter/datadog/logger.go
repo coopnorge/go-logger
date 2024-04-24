@@ -2,7 +2,7 @@ package datadog
 
 import (
 	"errors"
-	"strings"
+	"regexp"
 
 	coopLogger "github.com/coopnorge/go-logger"
 )
@@ -10,7 +10,9 @@ import (
 // Logger is a logging adapter between gopkg.in/DataDog/dd-trace-go.v1/ddtrace
 // an go-logger, do not create this directly, use NewLogger()
 type Logger struct {
-	instance *coopLogger.Logger
+	instance             *coopLogger.Logger
+	msgPattern           *regexp.Regexp
+	msgPatternGroupNames []string
 }
 
 // NewLogger creates a new Datadog logger that passes message to go-logger
@@ -30,7 +32,11 @@ type Logger struct {
 //		ddtrace.UseLogger(l)
 //	}
 func NewLogger(opts ...LoggerOption) (*Logger, error) {
-	logger := &Logger{}
+	msgPattern := regexp.MustCompile(`^(?P<source>Datadog\sTracer\sv\d+\.\d+\.\d+)\s(?P<level>(?:ERROR)|(?:WARN)|(?:INFO)|(?:DEBUG)):\s(?P<msg>.+)$`)
+	logger := &Logger{
+		msgPattern:           msgPattern,
+		msgPatternGroupNames: msgPattern.SubexpNames(),
+	}
 	for _, opt := range opts {
 		opt.Apply(logger)
 	}
@@ -42,23 +48,37 @@ func NewLogger(opts ...LoggerOption) (*Logger, error) {
 
 // Log writes statements to the log
 func (l *Logger) Log(msg string) {
-	// Logs from gopkg.in/DataDog/dd-trace-go.v1/ddtrace will contain keywords
-	// specifying the level of the log.
-	if strings.Contains(msg, "ERROR") {
-		l.instance.Error(msg)
+	matchResult, err := l.parseMsg(msg)
+	if err != nil {
+		l.instance.WithField("log_parse_err", err).Warn(msg)
 		return
 	}
-	if strings.Contains(msg, "WARN") {
-		l.instance.Warn(msg)
-		return
+
+	e := l.instance.WithField("source", matchResult["source"])
+
+	switch matchResult["level"] {
+	case "ERROR":
+		e.Error(matchResult["msg"])
+	case "WARN":
+		e.Warn(matchResult["msg"])
+	case "INFO":
+		e.Info(matchResult["msg"])
+	case "DEBUG":
+		e.Debug(matchResult["msg"])
+	default:
+		e.WithField("log_parse_err", "Could not resolve the level").WithField("parsed_level", matchResult["level"]).Warn(matchResult["msg"])
 	}
-	if strings.Contains(msg, "INFO") {
-		l.instance.Info(msg)
-		return
+}
+
+func (l *Logger) parseMsg(msg string) (map[string]string, error) {
+	matches := l.msgPattern.FindAllStringSubmatch(msg, -1)
+	if len(matches) == 0 {
+		return nil, errors.New("Datadog logger adapter could not match the log statement to the pattern, falling back to warning")
 	}
-	if strings.Contains(msg, "DEBUG") {
-		l.instance.Debug(msg)
-		return
+
+	matchResult := map[string]string{}
+	for i, n := range matches[0] {
+		matchResult[l.msgPatternGroupNames[i]] = n
 	}
-	l.instance.WithField("datadog", "Datadog logger adapter could not resolve the logging level, falling back to warning").Warn(msg)
+	return matchResult, nil
 }

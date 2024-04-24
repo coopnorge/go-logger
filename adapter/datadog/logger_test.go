@@ -25,21 +25,22 @@ func TestGlobalLogger(t *testing.T) {
 	require.NoError(t, err)
 
 	tests := []struct {
-		level string
-		msg   string
+		level    string
+		input    string
+		expected string
 	}{
-		{"error", "Datadog Tracer v1.63.0 ERROR This is a test"},
-		{"warning", "Datadog Tracer v1.63.0 WARN This is a test"},
-		{"info", "Datadog Tracer v1.63.0 INFO This is a test"},
-		{"debug", "Datadog Tracer v1.63.0 DEBUG This is a test"},
-		{"warning", "Datadog Tracer v1.63.0 This is a test for fallback level"},
+		{"error", "Datadog Tracer v1.63.0 ERROR: This is a test", "This is a test"},
+		{"warning", "Datadog Tracer v1.63.0 WARN: This is a test", "This is a test"},
+		{"info", "Datadog Tracer v1.63.0 INFO: This is a test", "This is a test"},
+		{"debug", "Datadog Tracer v1.63.0 DEBUG: This is a test", "This is a test"},
+		{"warning", "This is a test", "This is a test"},
 	}
 	for _, test := range tests {
 		t.Run(test.level, func(t *testing.T) {
 			output.Reset()
-			logger.Log(test.msg)
+			logger.Log(test.input)
 			assert.Contains(t, output.String(), fmt.Sprintf("\"level\":\"%v\"", test.level))
-			assert.Contains(t, output.String(), test.msg)
+			assert.Contains(t, output.String(), fmt.Sprintf("\"msg\":\"%v\"", test.expected))
 		})
 	}
 }
@@ -50,21 +51,22 @@ func TestCustomLogger(t *testing.T) {
 	require.NoError(t, err)
 
 	tests := []struct {
-		level string
-		msg   string
+		level    string
+		input    string
+		expected string
 	}{
-		{"error", "Datadog Tracer v1.63.0 ERROR This is a test"},
-		{"warning", "Datadog Tracer v1.63.0 WARN This is a test"},
-		{"info", "Datadog Tracer v1.63.0 INFO This is a test"},
-		{"debug", "Datadog Tracer v1.63.0 DEBUG This is a test"},
-		{"warning", "Datadog Tracer v1.63.0 This is a test for fallback level"},
+		{"error", "Datadog Tracer v1.63.0 ERROR: This is a test", "This is a test"},
+		{"warning", "Datadog Tracer v1.63.0 WARN: This is a test", "This is a test"},
+		{"info", "Datadog Tracer v1.63.0 INFO: This is a test", "This is a test"},
+		{"debug", "Datadog Tracer v1.63.0 DEBUG: This is a test", "This is a test"},
+		{"warning", "This is a test", "This is a test"},
 	}
 	for _, test := range tests {
 		t.Run(test.level, func(t *testing.T) {
 			output.Reset()
-			logger.Log(test.msg)
+			logger.Log(test.input)
 			assert.Contains(t, output.String(), fmt.Sprintf("\"level\":\"%v\"", test.level))
-			assert.Contains(t, output.String(), test.msg)
+			assert.Contains(t, output.String(), fmt.Sprintf("\"msg\":\"%v\"", test.expected))
 		})
 	}
 }
