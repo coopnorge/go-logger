@@ -12,7 +12,8 @@ import (
 // Logger is a logging adapter between Gorm an go-logger, do not create
 // this directly, use NewLogger()
 type Logger struct {
-	instance *coopLogger.Logger
+	instance     *coopLogger.Logger
+	traceEnabled bool
 }
 
 // NewLogger creates a new Gorm logger that passes message to go-logger
@@ -41,7 +42,9 @@ type Logger struct {
 //		}
 //	}
 func NewLogger(opts ...LoggerOption) (*Logger, error) {
-	logger := &Logger{}
+	logger := &Logger{
+		traceEnabled: false,
+	}
 	for _, opt := range opts {
 		opt.Apply(logger)
 	}
@@ -74,6 +77,9 @@ func (l *Logger) Error(ctx context.Context, msg string, data ...interface{}) {
 
 // Trace write SQL trace to the log
 func (l *Logger) Trace(ctx context.Context, begin time.Time, fc func() (sql string, rowsAffected int64), err error) {
+	if !l.traceEnabled {
+		return
+	}
 	elapsed := time.Since(begin)
 	_, rows := fc() // sql is dropped for privacy, use tracing in Datadog instead.
 	e := l.instance.WithContext(ctx).WithField("rows", rows).WithField("elapsed", elapsed)

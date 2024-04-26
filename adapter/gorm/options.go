@@ -30,3 +30,10 @@ func WithLogger(logger *coopLogger.Logger) LoggerOption {
 		l.instance = logger
 	})
 }
+
+// WithSQLTrace configures Gorm to output SQL trace logs
+func WithSQLTrace() LoggerOption {
+	return LoggerOptionFunc(func(l *Logger) {
+		l.traceEnabled = true
+	})
+}
