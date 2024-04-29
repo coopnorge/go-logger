@@ -104,7 +104,7 @@ import (
 )
 
 func main() {
-	l, err =: gormLogger.NewLogger(gormLogger.WithGlobalLogger())
+	l, err := gormLogger.NewLogger(gormLogger.WithGlobalLogger())
 	if err != nil {
 		panic(err)
 	}
@@ -132,7 +132,7 @@ import (
 )
 
 func main() {
-	l, err =: datadog.NewLogger(datadog.WithGlobalLogger())
+	l, err := datadog.NewLogger(datadog.WithGlobalLogger())
 	if err != nil {
 		panic(err)
 	}

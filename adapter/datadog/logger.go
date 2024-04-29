@@ -26,7 +26,7 @@ type Logger struct {
 //	)
 //
 //	func main() {
-//		l, err =: datadog.NewLogger(datadog.WithGlobalLogger())
+//		l, err := datadog.NewLogger(datadog.WithGlobalLogger())
 //		ddtrace.UseLogger(l)
 //	}
 func NewLogger(opts ...LoggerOption) (*Logger, error) {
