@@ -1,6 +1,9 @@
 package logger
 
-import "io"
+import (
+	"io"
+	"os"
+)
 
 // LoggerOption defines an applicator interface
 type LoggerOption interface { //nolint:all
@@ -66,4 +69,9 @@ func WithHook(hook Hook) LoggerOption {
 	return LoggerOptionFunc(func(l *Logger) {
 		l.logrusLogger.Hooks.Add(&logrusHook{hook: hook})
 	})
+}
+
+// WithLevelFromEnv allows to Configure Logger from Environment Variable.
+func WithLevelFromEnv(envName string) LoggerOption {
+	return WithLevelName(os.Getenv(envName))
 }
