@@ -127,3 +127,16 @@ func (logger *Logger) Fatal(args ...interface{}) {
 func (logger *Logger) Fatalf(format string, args ...interface{}) {
 	logger.entry().Fatalf(format, args...)
 }
+
+// SetLogLevelFromEnv allows to Configure Logger from Environment Variable with extra configuration.
+func (logger *Logger) SetLogLevelFromEnv(env string, args ...LoggerOption) error {
+	val := os.Getenv(env)
+	lvl, ok := LevelNameToLevel(val)
+
+	if !ok {
+		return ErrInvalidNameInEnv
+	}
+	args = append(args, WithLevel(lvl))
+	ConfigureGlobalLogger(args...)
+	return nil
+}
