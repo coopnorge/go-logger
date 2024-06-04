@@ -132,10 +132,10 @@ func (logger *Logger) Fatalf(format string, args ...interface{}) {
 func (logger *Logger) SetLogLevelFromEnv(env string, args ...LoggerOption) error {
 	val := os.Getenv(env)
 	lvl, ok := LevelNameToLevel(val)
-
 	if !ok {
 		return ErrInvalidNameInEnv
 	}
+
 	args = append(args, WithLevel(lvl))
 	ConfigureGlobalLogger(args...)
 	return nil
