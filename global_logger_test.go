@@ -220,7 +220,7 @@ func TestGlobalLoggerFromEnv(t *testing.T) {
 
 	ConfigureGlobalLogger(WithLevelFromEnv(envName), WithOutput(buf))
 	Info(logmsg)
-	readLogToBuffer(t, buf)
+	decodeLogToMap(t, buf)
 
 	assert.NotContains(t, buf.String(), logmsg)
 

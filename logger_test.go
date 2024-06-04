@@ -13,7 +13,7 @@ import (
 )
 
 func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expectedValue interface{}) {
-	log := readLogToBuffer(t, logReader)
+	log := decodeLogToMap(t, logReader)
 	v, ok := log[key]
 	if !ok {
 		t.Fatalf("no value found for key %v", key)
@@ -37,7 +37,7 @@ func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expec
 func getLineNumber(t *testing.T, logReader io.Reader) int {
 	const key = "file"
 
-	log := readLogToBuffer(t, logReader)
+	log := decodeLogToMap(t, logReader)
 
 	vAny, ok := log[key]
 	if !ok {
@@ -61,7 +61,7 @@ func getLineNumber(t *testing.T, logReader io.Reader) int {
 }
 
 func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
-	log := readLogToBuffer(t, logReader)
+	log := decodeLogToMap(t, logReader)
 
 	_, ok := log[key]
 	if !ok {
@@ -70,7 +70,7 @@ func assertLogEntryHasKey(t *testing.T, logReader io.Reader, key string) {
 }
 
 func assertLogEntryDoesNotHaveKey(t *testing.T, logReader io.Reader, key string) {
-	log := readLogToBuffer(t, logReader)
+	log := decodeLogToMap(t, logReader)
 
 	_, ok := log[key]
 	if ok {
@@ -78,7 +78,7 @@ func assertLogEntryDoesNotHaveKey(t *testing.T, logReader io.Reader, key string)
 	}
 }
 
-func readLogToBuffer(t *testing.T, logReader io.Reader) map[string]interface{} {
+func decodeLogToMap(t *testing.T, logReader io.Reader) map[string]interface{} {
 	t.Helper()
 	log := make(map[string]interface{})
 	err := json.NewDecoder(logReader).Decode(&log)
