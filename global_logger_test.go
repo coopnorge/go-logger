@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -227,7 +226,8 @@ func TestGlobalLoggerFromEnv(t *testing.T) {
 	// Test that it reads the var correctly to a Level in the Global Config
 	buf.Reset() // reset the buffer
 
-	os.Setenv("LOG_LEVEL", "info")
+	t.Setenv(envName, "info")
+
 	ConfigureGlobalLogger(WithLevelFromEnv(envName), WithOutput(buf))
 	Info(logmsg)
 
