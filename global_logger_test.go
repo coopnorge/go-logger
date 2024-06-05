@@ -5,6 +5,8 @@ import (
 	"context"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGlobalLoggerLogLevels(t *testing.T) {
@@ -192,4 +194,42 @@ func TestChainingSetup(t *testing.T) {
 		assertLogEntryContains(t, bytes.NewReader(b), "baz", "quoo")
 		assertLogEntryContains(t, bytes.NewReader(b), "number", float64(42))
 	}
+}
+
+func TestGlobalLoggerFromEnv(t *testing.T) {
+	const (
+		logmsg  = "Some log"
+		envName = "LOG_LEVEL"
+	)
+
+	buf := &bytes.Buffer{}
+	oldOutput := globalLogger.output
+	oldNowFunc := globalLogger.now
+	defer func() {
+		SetOutput(oldOutput)
+		SetNowFunc(oldNowFunc)
+		SetReportCaller(true)
+		SetLevel(globalLogger.level)
+	}()
+	{
+		SetOutput(buf)
+		SetNowFunc(mockNowFunc)
+		SetReportCaller(false)
+	}
+
+	ConfigureGlobalLogger(WithLevelFromEnv(envName), WithOutput(buf))
+	Info(logmsg)
+	decodeLogToMap(t, buf)
+
+	assert.NotContains(t, buf.String(), logmsg)
+
+	// Test that it reads the var correctly to a Level in the Global Config
+	buf.Reset() // reset the buffer
+
+	t.Setenv(envName, "info")
+
+	ConfigureGlobalLogger(WithLevelFromEnv(envName), WithOutput(buf))
+	Info(logmsg)
+
+	assertLogEntryContains(t, buf, "msg", logmsg)
 }
