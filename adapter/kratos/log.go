@@ -21,6 +21,7 @@ type LoggerKratosAdapter struct {
 //
 //	import (
 //		"github.com/coopnorge/go-logger"
+//		"github.com/coopnorge/go-logger/adapter/kratos"
 //		"github.com/go-kratos/kratos/v2/log"
 //	)
 //
