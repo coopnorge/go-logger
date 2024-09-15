@@ -57,14 +57,25 @@ jobs:
       - name: Validate
         run: make validate
 
+  techdocs:
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+      pull-requests: read
+    name: TechDocs
+    uses: coopnorge/github-workflow-techdocs/.github/workflows/techdocs.yaml@v0
+
   build:
     needs:
       - golang-ci
       - validate-old-go
+      - techdocs
     if: always()
     runs-on: ubuntu-latest
     steps:
       - run: exit 1
         name: "Catch errors"
         if: |
-          needs.golang-ci.result == 'failure'
+          needs.golang-ci.result == 'failure' ||
+          needs.techdocs.result == 'failure'

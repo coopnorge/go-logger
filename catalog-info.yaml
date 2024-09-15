@@ -4,6 +4,7 @@ metadata:
   name: go-logger
   annotations:
     github.com/project-slug: coopnorge/go-logger
+    backstage.io/techdocs-ref: dir:.
 spec:
   type: library
   lifecycle: production
