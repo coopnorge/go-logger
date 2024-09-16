@@ -63,5 +63,6 @@ cmake-build-*/
 # File-based project format
 *.iws
 
+mkdocs.yml
 .vale/
 !.vale/styles/config/vocabularies/General/
