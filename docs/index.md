@@ -141,6 +141,25 @@ func main() {
 }
 ```
 
+### Kratos
+
+To ensure that Kratos outputs logs in the correct format Kratos must be
+configured with a custom logger.
+
+```go
+	package main
+
+	import (
+		"github.com/coopnorge/go-logger"
+		"github.com/coopnorge/go-logger/adapter/kratos"
+		"github.com/go-kratos/kratos/v2/log"
+	)
+
+	func main() {
+		log.SetLogger(logs.NewLoggerKratosAdapter(logger.Global()))
+	}
+```
+
 ## Hooks
 
 Hooks are functions that are triggered on all log-entries and allow for data to
