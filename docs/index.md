@@ -263,5 +263,5 @@ func b(ctx context.Context) {
 
 - `github.com/coopnorge/go-datadog-lib/tracelogger.DDContextLogHook`
   relates-log entries inside of a Datadog span to that span. Documentation:
-  [Inventory](https://github.com/coopnorge/go-datadog-lib/blob/main/docs/index.md#datadog-context-log-hook),
-  [GitHub](https://inventory.internal.coop/docs/default/component/go-datadog-lib/#datadog-context-log-hook)
+  [Inventory](https://inventory.internal.coop/docs/default/component/go-datadog-lib/#datadog-context-log-hook),
+  [GitHub](https://github.com/coopnorge/go-datadog-lib/blob/main/docs/index.md#datadog-context-log-hook)
