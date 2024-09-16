@@ -2,140 +2,75 @@
 
 This Go package is used to offer a unified logging interface among projects.
 
-## Install
+## Documentation
 
-```shell
-go get github.com/coopnorge/go-logger
+There usage documentation in [docs](docs/). Development documentation is in
+this file.
+
+## Development workflow
+
+### Validate
+
+```bash
+docker compose run --rm golang-devtools validate
 ```
 
-## Import
+### Other targets
 
-```go
-import "github.com/coopnorge/go-logger"
+```bash
+docker compose run --rm golang-devtools help
 ```
 
-## Default behavior
+## Mocks
 
-By default, all logs will include:
-- Log level
-- Full path to file which called the logger, and line number
-- Signature of the function that called the logger
-- Timestamp of the log entry
+To generate or update mocks use
+[`gomockhandler`](https://github.com/sanposhiho/gomockhandler). `gomockhandler`
+is provided by `golang-devtools`.
 
-Example log entry with default settings:
+### Check mocks
 
-```go
-package main
-
-import "github.com/coopnorge/go-logger"
-
-func main() {
-	logger.Warn("something went wrong")
-	// Output:
-	// {"file":"/Users/anonymous/Projects/my-project/main.go:7","function":"main.main","level":"warning","msg":"something went wrong","time":"2022-02-17T15:04:06+01:00"}
-}
+```bash
+docker compose run --rm golang-devtools gomockhandler -config ./gomockhandler.json check
 ```
 
-## Example usage
+### Generate / Update mocks
 
-See [logger_examples_test.go](logger_examples_test.go) for more examples.
-
-### Using global logger
-
-```go
-package main
-
-import "github.com/coopnorge/go-logger"
-
-func main() {
-	logger.Info("this won't be logged because the default log level is higher than info")
-	logger.Warn("but this will be logged")
-	// Output:
-	// {"level":"warning","msg":"but this will be logged","time":"2022-02-17T11:01:28+01:00"}
-}
+```bash
+docker compose run --rm golang-devtools gomockhandler -config ./gomockhandler.json mockgen
 ```
 
-### Setting log level
+## User documentation
 
-```go
-package main
+User documentation is build using TechDocs and published to
+[Inventory](https://inventory.internal.coop/docs/default/component/go-logger).
 
-import "github.com/coopnorge/go-logger"
+To list the commands available for the TechDocs image:
 
-func main() {
-	// global logger
-	logger.Info("this won't be logged because the default log level is higher than info")
-	logger.ConfigureGlobalLogger(logger.WithLevel(logger.LevelInfo))
-	logger.Info("now this will be logged")
-	// Output:
-	// {"level":"info","msg":"now this will be logged","time":"2022-02-17T10:54:54+01:00"}
-
-	// logger instance
-	prodLogger := logger.New(logger.WithLevel(logger.LevelWarn))
-	prodLogger.Info("this won't be logged because prodLogger's level is set to Warn...")
-	prodLogger.Error("...but this will, because Error >= Warn")
-	// Output:
-	// {"level":"error","msg":"...but this will, because Error \u003e= Warn","time":"2022-02-17T10:54:54+01:00"}
-
-	debugLogger := logger.New(logger.WithLevel(logger.LevelDebug))
-	debugLogger.Debug("this logger will log anything as Debug is the lowest available level")
-	debugLogger.Warn("and this will be logged too")
-	// Output:
-	// {"level":"debug","msg":"this logger will log anything as Debug is the lowest available level","time":"2022-02-17T10:54:54+01:00"}
-	// {"level":"warning","msg":"and this will be logged too","time":"2022-02-17T10:54:54+01:00"}
-}
+```sh
+docker compose run --rm help
 ```
 
-## Adapters
+For more information see the [TechDocs Engineering
+Image](https://github.com/coopnorge/engineering-docker-images/tree/main/images/techdocs).
 
-### Gorm
+### Documentation validation
 
-To ensure that Gorm outputs logs in the correct format Gorm must be configured
-with a [custom logger](https://gorm.io/docs/logger.html#Customize-Logger).
+To Validate changed documentation:
 
-```go
-package main
-
-import (
-	gormLogger "github.com/coopnorge/go-logger/adapter/gorm"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-)
-
-func main() {
-	l, err := gormLogger.NewLogger(gormLogger.WithGlobalLogger())
-	if err != nil {
-		panic(err)
-	}
-	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
-		Logger: l,
-	})
-	if err != nil {
-		panic(err)
-	}
-}
+```sh
+docker compose run --rm techdocs validate
 ```
 
-### Datadog
+To validate all documentation:
 
-To ensure that Datadog outputs logs in the correct format Datadog must be
-configured with a custom logger.
+```sh
+docker compose run --rm techdocs validate MARKDOWN_FILES=docs/
+```
 
-```go
-package main
+### Documentation preview
 
-import (
-	"github.com/coopnorge/go-logger/adapter/datadog"
+To preview the documentation:
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace"
-)
-
-func main() {
-	l, err := datadog.NewLogger(datadog.WithGlobalLogger())
-	if err != nil {
-		panic(err)
-	}
-	ddtrace.UseLogger(l)
-}
+```sh
+docker compose up techdocs
 ```
