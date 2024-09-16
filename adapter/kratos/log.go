@@ -49,15 +49,15 @@ func (l *LoggerKratosAdapter) Log(level log.Level, keyValPairs ...interface{}) e
 
 	switch level {
 	case log.LevelFatal:
-		coopLog.Fatal(keyValPairs...)
+		l.log.Fatal(keyValPairs...)
 	case log.LevelError:
-		coopLog.Error(keyValPairs...)
+		l.log.Error(keyValPairs...)
 	case log.LevelWarn:
-		coopLog.Warn(keyValPairs...)
+		l.log.Warn(keyValPairs...)
 	case log.LevelInfo:
-		coopLog.Info(keyValPairs...)
+		l.log.Info(keyValPairs...)
 	default:
-		coopLog.Debug(keyValPairs...)
+		l.log.Debug(keyValPairs...)
 	}
 
 	return nil
