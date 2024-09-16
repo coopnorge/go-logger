@@ -140,3 +140,109 @@ func main() {
 	ddtrace.UseLogger(l)
 }
 ```
+
+## Hooks
+
+Hooks are functions that are triggered on all log-entries and allow for data to
+be collected and added to log-entry.
+
+To configure a new Hook for the global logger call
+`logger.ConfigureGlobalLogger(opts ...logger.LoggerOption)` and pass the
+`LoggerOption` created by `logger.WithHook(hook logger.Hook)` or
+`logger.WithHookFunc(hook logger.HookFunc)`.
+
+The function `logger.WithHook` takes a pointer to a struct that implement the
+`logger.Hook` interface, the function `logger.WithHookFunc` takes a function
+with a signature that matches the `logger.HookFunc`.
+
+```go
+package logger
+
+// Hook defines the interface a custom Hook needs to implement
+type Hook interface {
+	Fire(*HookEntry) (changed bool, err error)
+}
+
+// HookFunc can be used to convert a simple function to implement the Hook interface.
+type HookFunc func(*HookEntry) (changed bool, err error)
+```
+
+The struct `logger.HookEntry` contains the fields provided for mutation in a Hook.
+
+A typical use case for a Hook is to extract data from the `context.Context` set
+by the user using `logger.WithContext(ctx context.Context)`. The data in the
+context set by the user may have been set further up in the call stack of where
+the log-entry is created.
+
+### Example - username logging hook
+
+```go title="app/userhook/hook.go"
+package userhook
+
+import (
+	"github.com/coopnorge/go-logger"
+)
+
+type UserContextLogHook struct{}
+
+type UserKey struct{}
+
+// Fire implements logger.Hook interface
+func (u *UserContextLogHook) Fire(he *logger.HookEntry) (bool, error) {
+	ctx := he.Context
+	if ctx == nil {
+		return false, nil
+	}
+
+	value, ok := ctx.Value(UserKey{}).(string)
+	if !ok || value == "" {
+		return false, nil
+	}
+
+	he.Data["user"] = value
+
+	return true, nil
+}
+
+func NewHook() logger.Hook {
+	return &UserContextLogHook{}
+}
+```
+
+```go title="app/main.go"
+package main
+
+import (
+	"github.com/coopnorge/app/userhook"
+
+	"github.com/coopnorge/go-datadog-lib/v2/tracelogger"
+	"github.com/coopnorge/go-logger"
+)
+
+func main() {
+	ctx := context.Background()
+	logger.ConfigureGlobalLogger(
+		logger.WithHook(userhook.NewHook()),
+	)
+	a(ctx)
+}
+
+func a(ctx context.Context) {
+	username := "peter"
+	ctx := context.WithValue(ctx, userhook.UserKey{}, username)
+	b(ctx)
+}
+
+func b(ctx context.Context) {
+	logger.WithContext(ctx).Warn("Hello")
+	// Output:
+	// {"user": "peter", "level":"warning","msg":"hello","time":"2024-09-16T09:09:00+01:00"}
+}
+```
+
+### Known Hooks
+
+- `github.com/coopnorge/go-datadog-lib/tracelogger.DDContextLogHook`
+  relates-log entries inside of a Datadog span to that span. Documentation:
+  [Inventory](https://github.com/coopnorge/go-datadog-lib/blob/main/docs/index.md#datadog-context-log-hook),
+  [GitHub](https://inventory.internal.coop/docs/default/component/go-datadog-lib/#datadog-context-log-hook)
