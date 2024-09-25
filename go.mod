@@ -1,6 +1,6 @@
 module github.com/coopnorge/go-logger
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/glebarez/sqlite v1.11.0
