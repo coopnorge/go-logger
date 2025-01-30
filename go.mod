@@ -8,7 +8,7 @@ require (
 	github.com/labstack/gommon v0.4.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
-	gopkg.in/DataDog/dd-trace-go.v1 v1.70.3
+	gopkg.in/DataDog/dd-trace-go.v1 v1.71.0
 	gorm.io/gorm v1.25.12
 )
 
@@ -28,8 +28,8 @@ require (
 	github.com/tinylib/msgp v1.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/sys v0.24.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/libc v1.37.6 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
