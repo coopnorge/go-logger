@@ -6,7 +6,7 @@ on:
 jobs:
   golang-ci:
     name: Go Lang CI
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       docker-compose-service: golang-devtools
       XDG_CACHE_HOME: ${{ github.workspace }}/.cache/xdg
@@ -40,7 +40,7 @@ jobs:
         run: docker compose run --rm ${{ env.docker-compose-service }} validate VERBOSE=all
 
   validate-old-go:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         go: ['1.22', '1.23']
@@ -71,7 +71,7 @@ jobs:
       - validate-old-go
       - techdocs
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - run: exit 1
         name: "Catch errors"
