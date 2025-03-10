@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/glebarez/sqlite v1.11.0
-	github.com/go-kratos/kratos/v2 v2.8.3
+	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/labstack/gommon v0.4.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.10.0
