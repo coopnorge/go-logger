@@ -7,6 +7,8 @@ jobs:
   golang-ci:
     name: Go Lang CI
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     env:
       docker-compose-service: golang-devtools
       XDG_CACHE_HOME: ${{ github.workspace }}/.cache/xdg
@@ -40,6 +42,8 @@ jobs:
         run: docker compose run --rm ${{ env.docker-compose-service }} validate VERBOSE=all
 
   validate-old-go:
+    permissions:
+      contents: read
     runs-on: ubuntu-24.04
     strategy:
       matrix:
