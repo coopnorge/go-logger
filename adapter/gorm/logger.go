@@ -49,7 +49,7 @@ func NewLogger(opts ...LoggerOption) (*Logger, error) {
 		opt.Apply(logger)
 	}
 	if logger.instance == nil {
-		return nil, errors.New("No go-logger instance provided, use WithGlobalLogger() or WithLogger() to configure the logger")
+		return nil, errors.New("no go-logger instance provided, use WithGlobalLogger() or WithLogger() to configure the logger")
 	}
 	return logger, nil
 }

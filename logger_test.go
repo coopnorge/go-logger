@@ -236,7 +236,7 @@ func wasLogged(t *testing.T, logReader io.Reader) bool {
 	if err != nil && err != io.EOF {
 		t.Fatalf("cannot read log entry: %v", err)
 	}
-	return !(err == io.EOF || len(b) == 0)
+	return err != io.EOF && len(b) != 0
 }
 
 func TestSettingLogLevel(t *testing.T) {
