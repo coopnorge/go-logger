@@ -10,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expectedValue interface{}) {
@@ -492,4 +495,71 @@ func TestReuseEntryWithFields(t *testing.T) {
 	assertLogEntryContains(t, strings.NewReader(lines[2]), "level", "info")
 	assertLogEntryDoesNotHaveKey(t, strings.NewReader(lines[2]), "only-quoo")
 	assertLogEntryDoesNotHaveKey(t, strings.NewReader(lines[2]), "error")
+}
+
+func TestTimeFormat(t *testing.T) {
+	osloLoc, err := time.LoadLocation("Europe/Oslo")
+	require.NoError(t, err)
+	testcases := []struct {
+		name     string
+		now      time.Time
+		expected string
+	}{
+		{
+			name:     "sample timestamp",
+			now:      time.Date(2020, 2, 3, 4, 5, 6, 789012345, time.UTC),
+			expected: "2020-02-03T04:05:06.789Z",
+		},
+		{
+			name:     "removes trailing zeros in sub-seconds part",
+			now:      time.Date(2020, 2, 3, 4, 5, 8, 123000000, time.UTC),
+			expected: "2020-02-03T04:05:08.123Z",
+		},
+		{
+			name:     "removes trailing zeros in sub-seconds part",
+			now:      time.Date(2020, 2, 3, 4, 5, 8, 120000000, time.UTC),
+			expected: "2020-02-03T04:05:08.12Z",
+		},
+		{
+			name:     "removes trailing zeros in sub-seconds part",
+			now:      time.Date(2020, 2, 3, 4, 5, 8, 100000000, time.UTC),
+			expected: "2020-02-03T04:05:08.1Z",
+		},
+		{
+			name:     "includes 1 millisecond in output",
+			now:      time.Date(2020, 2, 3, 4, 5, 8, 1000000, time.UTC),
+			expected: "2020-02-03T04:05:08.001Z",
+		},
+		{
+			name:     "omits sub-second precision when nano is 0",
+			now:      time.Date(2020, 2, 3, 4, 5, 8, 0, time.UTC),
+			expected: "2020-02-03T04:05:08Z",
+		},
+		{
+			name:     "omits sub-second precision when nano is rounded to 0",
+			now:      time.Date(2020, 2, 3, 4, 5, 8, 999999, time.UTC),
+			expected: "2020-02-03T04:05:08Z",
+		},
+		{
+			name:     "sample timestamp Oslo (Winter-time)",
+			now:      time.Date(2020, 2, 3, 4, 5, 6, 789012345, osloLoc),
+			expected: "2020-02-03T04:05:06.789+01:00",
+		},
+		{
+			name:     "sample timestamp Oslo (Summer-time)",
+			now:      time.Date(2020, 6, 3, 4, 5, 6, 789012345, osloLoc),
+			expected: "2020-06-03T04:05:06.789+02:00",
+		},
+	}
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			builder := &strings.Builder{}
+			nowFunc := func() time.Time { return tc.now }
+			logger := New(WithOutput(builder), WithLevel(LevelInfo), WithNowFunc(nowFunc))
+			logger.Info("test time")
+
+			log := builder.String()
+			assertLogEntryContains(t, strings.NewReader(log), "time", tc.expected)
+		})
+	}
 }

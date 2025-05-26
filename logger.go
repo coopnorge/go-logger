@@ -35,7 +35,9 @@ func (logger *Logger) applyOptions(opts ...LoggerOption) {
 // New creates and returns a new logger with supplied options
 func New(opts ...LoggerOption) *Logger {
 	logrusLogger := logrus.New()
-	logrusLogger.SetFormatter(&logrus.JSONFormatter{})
+	logrusLogger.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat: "2006-01-02T15:04:05.999Z07:00", // Adds milliseconds to the time-output
+	})
 	logger := &Logger{
 		logrusLogger: logrusLogger,
 		now:          NowFunc(time.Now),
