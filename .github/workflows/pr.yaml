@@ -41,6 +41,14 @@ jobs:
       - name: Validate
         run: docker compose run --rm ${{ env.docker-compose-service }} validate VERBOSE=all
 
+  mage:
+    uses: coopnorge/mage/.github/workflows/mage.yaml@main
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    secrets: inherit
+
   validate-old-go:
     permissions:
       contents: read
