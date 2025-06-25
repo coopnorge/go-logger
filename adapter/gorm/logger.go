@@ -61,18 +61,18 @@ func (l *Logger) LogMode(logger.LogLevel) logger.Interface {
 }
 
 // Info writes info level statements to the log
-func (l *Logger) Info(ctx context.Context, msg string, data ...interface{}) {
-	l.instance.WithContext(ctx).WithField("data", data).Info(msg)
+func (l *Logger) Info(ctx context.Context, msg string, data ...any) {
+	l.instance.WithContext(ctx).Infof(msg, data...)
 }
 
 // Warn writes warn level statements to the log
-func (l *Logger) Warn(ctx context.Context, msg string, data ...interface{}) {
-	l.instance.WithContext(ctx).WithField("data", data).Warn(msg)
+func (l *Logger) Warn(ctx context.Context, msg string, data ...any) {
+	l.instance.WithContext(ctx).Warnf(msg, data...)
 }
 
 // Error writes error level statements to the log
-func (l *Logger) Error(ctx context.Context, msg string, data ...interface{}) {
-	l.instance.WithContext(ctx).WithField("data", data).Error(msg)
+func (l *Logger) Error(ctx context.Context, msg string, data ...any) {
+	l.instance.WithContext(ctx).Errorf(msg, data...)
 }
 
 // Trace write SQL trace to the log
