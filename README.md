@@ -9,17 +9,32 @@ this file.
 
 ## Development workflow
 
+The source code is build using `mage`.
+
+### Prerequisites
+
+1. Install Go version 1.24 or later and
+   [Docker](https://docs.docker.com/get-docker/).
+
+2. Install Go tools:
+
+   ```bash
+   go install tool
+   ```
+
+
 ### Validate
 
 ```bash
-docker compose run --rm golang-devtools validate
+go tool mage validate
 ```
 
 ### Other targets
 
 ```bash
-docker compose run --rm golang-devtools help
+go tool mage -l
 ```
+
 
 ## Mocks
 

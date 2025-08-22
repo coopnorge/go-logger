@@ -3,6 +3,7 @@ module github.com/coopnorge/go-logger
 go 1.25.0
 
 require (
+	github.com/coopnorge/mage v0.7.1
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-kratos/kratos/v2 v2.8.4
 	github.com/labstack/gommon v0.4.2
@@ -20,6 +21,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/magefile/mage v1.15.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
@@ -35,3 +37,5 @@ require (
 	modernc.org/memory v1.7.2 // indirect
 	modernc.org/sqlite v1.28.0 // indirect
 )
+
+tool github.com/magefile/mage
