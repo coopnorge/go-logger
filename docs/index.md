@@ -137,6 +137,24 @@ configured with a custom logger.
 	}
 ```
 
+### Goose
+
+To ensure that Goose outputs logs in the correct format, Goose must be
+configured with a custom logger.
+
+```go
+	package main
+
+	import (
+        "github.com/pressly/goose/v3"
+        gooseLogger "github.com/coopnorge/go-logger/adapter/goose"
+	)
+
+	func main() {
+        goose.SetLogger(gooseLogger.New())
+	}
+```
+
 ## Hooks
 
 Hooks are functions that are triggered on all log-entries and allow for data to
