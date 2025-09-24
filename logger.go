@@ -90,6 +90,11 @@ func (logger *Logger) Infof(format string, args ...interface{}) {
 	logger.entry().Infof(format, args...)
 }
 
+// Printf forwards a logging call in the (format, args) format
+func (logger *Logger) Printf(format string, args ...interface{}) {
+	logger.entry().Infof(format, args...)
+}
+
 // Error forwards an error logging call
 func (logger *Logger) Error(args ...interface{}) {
 	logger.entry().Error(args...)
