@@ -10,9 +10,9 @@ type Logger struct {
 }
 
 // New creates a new GooseLogger instance
-func New() *Logger {
+func New(logger *log.Logger) *Logger {
 	return &Logger{
-		log: log.New(log.WithLevel(log.LevelInfo)),
+		log: logger,
 	}
 }
 

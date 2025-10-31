@@ -146,12 +146,13 @@ configured with a custom logger.
 	package main
 
 	import (
+        "github.com/coopnorge/go-logger"
         "github.com/pressly/goose/v3"
         gooseLogger "github.com/coopnorge/go-logger/adapter/goose"
 	)
 
 	func main() {
-        goose.SetLogger(gooseLogger.New())
+        goose.SetLogger(gooseLogger.New(logger.Global()))
 	}
 ```
 
