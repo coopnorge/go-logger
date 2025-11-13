@@ -10,7 +10,7 @@ require (
 	github.com/pressly/goose/v3 v3.26.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.11.1
-	gorm.io/gorm v1.31.0
+	gorm.io/gorm v1.31.1
 )
 
 require (
