@@ -55,70 +55,62 @@ func addCallerFields(logrusFields logrus.Fields, reportCaller bool) {
 
 // Info forwards a logging call in the (format, args) format
 func (e *Entry) Info(args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Info(args...)
+	e.Log(LevelInfo, args...)
 }
 
 // Infof forwards a logging call in the (format, args) format
 func (e *Entry) Infof(format string, args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Infof(format, args...)
+	e.Logf(LevelInfo, format, args...)
 }
 
 // Error forwards an error logging call
 func (e *Entry) Error(args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Error(args...)
+	e.Log(LevelError, args...)
 }
 
 // Errorf forwards an error logging call
 func (e *Entry) Errorf(format string, args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Errorf(format, args...)
+	e.Logf(LevelError, format, args...)
 }
 
 // Debug forwards a debugging logging call
 func (e *Entry) Debug(args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Debug(args...)
+	e.Log(LevelDebug, args...)
 }
 
 // Debugf forwards a debugging logging call
 func (e *Entry) Debugf(format string, args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Debugf(format, args...)
+	e.Logf(LevelDebug, format, args...)
 }
 
 // Warn forwards a warning logging call
 func (e *Entry) Warn(args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Warn(args...)
+	e.Log(LevelWarn, args...)
 }
 
 // Warnf forwards a warning logging call
 func (e *Entry) Warnf(format string, args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Warnf(format, args...)
+	e.Logf(LevelWarn, format, args...)
 }
 
 // Fatal forwards a fatal logging call
 func (e *Entry) Fatal(args ...interface{}) {
-	logrusFields := logrus.Fields(e.fields)
-	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Fatal(args...)
+	e.Log(LevelFatal, args...)
 }
 
 // Fatalf forwards a fatal logging call
 func (e *Entry) Fatalf(format string, args ...interface{}) {
+	e.Logf(LevelFatal, format, args...)
+}
+
+func (e *Entry) Logf(level Level, format string, args ...any) {
 	logrusFields := logrus.Fields(e.fields)
 	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Fatalf(format, args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Logf(level.toLogrusLevel(), format, args...)
+}
+
+func (e *Entry) Log(level Level, args ...any) {
+	logrusFields := logrus.Fields(e.fields)
+	addCallerFields(logrusFields, e.logger.reportCaller)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Log(level.toLogrusLevel(), args...)
 }
