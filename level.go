@@ -9,6 +9,22 @@ import (
 // Level is an integer representation of the logging level
 type Level uint8
 
+func (l Level) toLogrusLevel() logrus.Level {
+	switch l {
+	case LevelFatal:
+		return logrus.FatalLevel
+	case LevelError:
+		return logrus.ErrorLevel
+	case LevelWarn:
+		return logrus.WarnLevel
+	case LevelInfo:
+		return logrus.InfoLevel
+	case LevelDebug:
+		return logrus.DebugLevel
+	}
+	panic("invalid level")
+}
+
 const (
 	// LevelFatal is to be used to log predictable errors that make the service unusable, eg misconfiguration. After logging, the app will be shut down.
 	LevelFatal = iota
