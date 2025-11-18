@@ -106,11 +106,11 @@ func (e *Entry) Fatalf(format string, args ...interface{}) {
 func (e *Entry) Logf(level Level, format string, args ...any) {
 	logrusFields := logrus.Fields(e.fields)
 	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Logf(level.toLogrusLevel(), format, args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Logf(mapLevelToLogrusLevel(level), format, args...)
 }
 
 func (e *Entry) Log(level Level, args ...any) {
 	logrusFields := logrus.Fields(e.fields)
 	addCallerFields(logrusFields, e.logger.reportCaller)
-	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Log(level.toLogrusLevel(), args...)
+	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Log(mapLevelToLogrusLevel(level), args...)
 }
