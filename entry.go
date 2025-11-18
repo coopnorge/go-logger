@@ -103,12 +103,14 @@ func (e *Entry) Fatalf(format string, args ...interface{}) {
 	e.Logf(LevelFatal, format, args...)
 }
 
+// Logf forwards a logging call
 func (e *Entry) Logf(level Level, format string, args ...any) {
 	logrusFields := logrus.Fields(e.fields)
 	addCallerFields(logrusFields, e.logger.reportCaller)
 	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Logf(mapLevelToLogrusLevel(level), format, args...)
 }
 
+// Log forwards a logging call
 func (e *Entry) Log(level Level, args ...any) {
 	logrusFields := logrus.Fields(e.fields)
 	addCallerFields(logrusFields, e.logger.reportCaller)
