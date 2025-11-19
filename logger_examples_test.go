@@ -85,7 +85,7 @@ func ExampleGlobal() {
 	// Output: {"level":"warning","msg":"foobar","time":"2020-10-10T10:10:10.001Z"}
 }
 
-func ExampleLog() {
+func ExampleLogger_Log() {
 	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false))
 
 	warnIfLastAttempt := func(deliveryCount int) Level {
@@ -107,7 +107,7 @@ func ExampleLog() {
 	// {"level":"warning","msg":"message delivery count: 5","time":"2020-10-10T10:10:10.001Z"}
 }
 
-func ExampleLogf() {
+func ExampleLogger_Logf() {
 	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false))
 
 	// Imagine that this is not in a for loop, but in a message handler or similar;
