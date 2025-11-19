@@ -76,7 +76,7 @@ func getCaller() *runtime.Frame {
 // Example mappings:
 //
 //	"github.com/myorg/my-repo.something.func1" → "github.com/myorg/my-repo"
-//	"myrepo.mypkg.MyFunc"                      → "myrepo"
+//	"myrepo.myfile.MyFunc"                     → "myrepo"
 //	"package/subpackage.Function"              → "package/subpackage"
 //	"simplepkg"                                → "simplepkg"
 //
