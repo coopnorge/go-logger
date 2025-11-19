@@ -108,6 +108,11 @@ func (e *Entry) Logf(level Level, format string, args ...any) {
 	logrusFields := logrus.Fields(e.fields)
 	addCallerFields(logrusFields, e.logger.reportCaller)
 	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Logf(mapLevelToLogrusLevel(level), format, args...)
+
+	// This ensures that logging with level Fatal results in Exit regardless if using .Fatalf or .Logf(LevelFatal, ...)
+	if level == LevelFatal {
+		e.logger.logrusLogger.Exit(1)
+	}
 }
 
 // Log forwards a logging call
@@ -115,4 +120,9 @@ func (e *Entry) Log(level Level, args ...any) {
 	logrusFields := logrus.Fields(e.fields)
 	addCallerFields(logrusFields, e.logger.reportCaller)
 	e.logger.logrusLogger.WithContext(e.context).WithTime(e.logger.now()).WithFields(logrusFields).Log(mapLevelToLogrusLevel(level), args...)
+
+	// This ensures that logging with level Fatal results in Exit regardless if using .Fatal or .Log(LevelFatal, ...)
+	if level == LevelFatal {
+		e.logger.logrusLogger.Exit(1)
+	}
 }
