@@ -68,18 +68,35 @@ func getCaller() *runtime.Frame {
 	return nil
 }
 
-// getPackageName reduces a fully qualified function name to the package name
-// There really ought to be to be a better way...
+// getPackageName returns the package path part of a fully-qualified function name.
+//
+// It is intended for strings in the format produced by runtime.FuncForPC.Name(),
+// where the function/type suffix is appended using '.' characters.
+//
+// Example mappings:
+//
+//	"github.com/myorg/my-repo.something.func1" → "github.com/myorg/my-repo"
+//	"myrepo.mypkg.MyFunc"                      → "myrepo"
+//	"package/subpackage.Function"              → "package/subpackage"
+//	"simplepkg"                                → "simplepkg"
+//
+// The rule is: take everything from the start of the string up to the first '.'
+// that appears after the last '/' (if any). If there is no such '.', the whole
+// string is treated as the package name.
 func getPackageName(f string) string {
-	for {
-		lastPeriod := strings.LastIndex(f, ".")
-		lastSlash := strings.LastIndex(f, "/")
-		if lastPeriod > lastSlash {
-			f = f[:lastPeriod]
-		} else {
-			break
-		}
+	// Start searching for '.' just after the last '/' (or at 0 if there is no '/').
+	start := strings.LastIndexByte(f, '/')
+	if start == -1 {
+		start = 0
+	} else {
+		start++ // move past the '/'
 	}
 
+	// Find the first '.' after that point.
+	if i := strings.IndexByte(f[start:], '.'); i != -1 {
+		return f[:start+i]
+	}
+
+	// No '.' after the last '/', so treat the entire string as the package name.
 	return f
 }
