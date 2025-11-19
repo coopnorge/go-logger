@@ -84,3 +84,44 @@ func ExampleGlobal() {
 	funcThatAcceptsInterface(Global())
 	// Output: {"level":"warning","msg":"foobar","time":"2020-10-10T10:10:10.001Z"}
 }
+
+func ExampleLog() {
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false))
+
+	warnIfLastAttempt := func(deliveryCount int) Level {
+		if deliveryCount < 5 {
+			return LevelInfo
+		}
+		return LevelWarn
+	}
+
+	// Imagine that this is not in a for loop, but in a message handler or similar;
+	for deliveryCount := 1; deliveryCount <= 5; deliveryCount++ {
+		logger.Log(warnIfLastAttempt(deliveryCount), "message delivery count:", deliveryCount)
+	}
+	// Output:
+	// {"level":"info","msg":"message delivery count: 1","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"info","msg":"message delivery count: 2","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"info","msg":"message delivery count: 3","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"info","msg":"message delivery count: 4","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"warning","msg":"message delivery count: 5","time":"2020-10-10T10:10:10.001Z"}
+}
+
+func ExampleLogf() {
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false))
+
+	// Imagine that this is not in a for loop, but in a message handler or similar;
+	for deliveryCount := 1; deliveryCount <= 5; deliveryCount++ {
+		level := LevelWarn
+		if deliveryCount < 5 {
+			level = LevelInfo
+		}
+		logger.Logf(level, "DeliveryCount is %d; level chosen based on value", deliveryCount)
+	}
+	// Output:
+	// {"level":"info","msg":"DeliveryCount is 1; level chosen based on value","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"info","msg":"DeliveryCount is 2; level chosen based on value","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"info","msg":"DeliveryCount is 3; level chosen based on value","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"info","msg":"DeliveryCount is 4; level chosen based on value","time":"2020-10-10T10:10:10.001Z"}
+	// {"level":"warning","msg":"DeliveryCount is 5; level chosen based on value","time":"2020-10-10T10:10:10.001Z"}
+}
