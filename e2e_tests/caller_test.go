@@ -44,12 +44,12 @@ func TestGetCallerFromPreviousEntry(t *testing.T) {
 	// It should contain the exact correct line number that the log was called from.
 
 	builder := &strings.Builder{}
-	logger := logger.New(logger.WithOutput(builder), logger.WithReportCaller(true), logger.WithLevel(logger.LevelDebug))
+	l := logger.New(logger.WithOutput(builder), logger.WithReportCaller(true), logger.WithLevel(logger.LevelDebug))
 
-	entry := logger.WithField("key", "value")
+	entry := l.WithField("key", "value")
 
-	entry.Info("Hello")
-	_, _, line, ok := runtime.Caller(0) // Important: Run this IMMEDIATELY after the log line
+	entry.Log(logger.LevelInfo, "Hello") // Since the other methods use Log/Logf internally, this is the methods with the shallowest stack
+	_, _, line, ok := runtime.Caller(0)  // Important: Run this IMMEDIATELY after the log line
 	require.True(t, ok)
 	expectedLine := line - 1 // We want the log to contain the line where logger.Info was called, NOT where the entry was created
 
