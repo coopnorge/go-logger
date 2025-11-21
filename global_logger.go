@@ -87,6 +87,16 @@ func Fatalf(format string, args ...interface{}) {
 	globalLogger.Fatalf(format, args...)
 }
 
+// Log uses global logger to log payload on the level of the first parameter
+func Log(level Level, args ...interface{}) {
+	globalLogger.Log(level, args...)
+}
+
+// Logf uses global logger to log payload on the level of the first parameter
+func Logf(level Level, format string, args ...interface{}) {
+	globalLogger.Logf(level, format, args...)
+}
+
 // SetNowFunc sets `now` func user by global logger
 func SetNowFunc(nowFunc NowFunc) {
 	ConfigureGlobalLogger(WithNowFunc(nowFunc))

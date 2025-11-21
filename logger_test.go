@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -166,6 +167,82 @@ func TestLogLevelsInFormatFuncs(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {
 			tc.logFunc("foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+		})
+	}
+}
+
+func TestLogLevelsInLogFunc(t *testing.T) {
+	type testCase struct {
+		logLevel         Level
+		expectedLogLevel string
+	}
+	buf := &bytes.Buffer{}
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
+	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
+	testCases := map[string]testCase{
+		"logger.Infof() should log with level info": {
+			logLevel:         LevelInfo,
+			expectedLogLevel: "info",
+		},
+		"logger.Errorf() should log with level error": {
+			logLevel:         LevelError,
+			expectedLogLevel: "error",
+		},
+		"logger.Debugf() should log with level debug": {
+			logLevel:         LevelDebug,
+			expectedLogLevel: "debug",
+		},
+		"logger.Warnf() should log with level warning": {
+			logLevel:         LevelWarn,
+			expectedLogLevel: "warning",
+		},
+		"logger.Fatalf() should log with level fatal": {
+			logLevel:         LevelFatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testLogger.Log(tc.logLevel, "foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+		})
+	}
+}
+
+func TestLogLevelsInLogfFunc(t *testing.T) {
+	type testCase struct {
+		logLevel         Level
+		expectedLogLevel string
+	}
+	buf := &bytes.Buffer{}
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
+	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
+	testCases := map[string]testCase{
+		"logger.Infof() should log with level info": {
+			logLevel:         LevelInfo,
+			expectedLogLevel: "info",
+		},
+		"logger.Errorf() should log with level error": {
+			logLevel:         LevelError,
+			expectedLogLevel: "error",
+		},
+		"logger.Debugf() should log with level debug": {
+			logLevel:         LevelDebug,
+			expectedLogLevel: "debug",
+		},
+		"logger.Warnf() should log with level warning": {
+			logLevel:         LevelWarn,
+			expectedLogLevel: "warning",
+		},
+		"logger.Fatalf() should log with level fatal": {
+			logLevel:         LevelFatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testLogger.Logf(tc.logLevel, "foobar")
 			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
 		})
 	}
@@ -560,6 +637,79 @@ func TestTimeFormat(t *testing.T) {
 
 			log := builder.String()
 			assertLogEntryContains(t, strings.NewReader(log), "time", tc.expected)
+		})
+	}
+}
+
+func TestOnlyFatalExits(t *testing.T) {
+	type testCase struct {
+		logFunc          func(args ...interface{})
+		logfFunc         func(format string, args ...interface{})
+		logLevel         Level
+		expectedLogLevel string
+	}
+	buf := &bytes.Buffer{}
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
+	testCases := map[string]testCase{
+		"level info": {
+			logFunc:          testLogger.Info,
+			logfFunc:         testLogger.Infof,
+			logLevel:         LevelInfo,
+			expectedLogLevel: "info",
+		},
+		"level error": {
+			logFunc:          testLogger.Error,
+			logfFunc:         testLogger.Errorf,
+			logLevel:         LevelError,
+			expectedLogLevel: "error",
+		},
+		"level debug": {
+			logFunc:          testLogger.Debug,
+			logfFunc:         testLogger.Debugf,
+			logLevel:         LevelDebug,
+			expectedLogLevel: "debug",
+		},
+		"level warning": {
+			logFunc:          testLogger.Warn,
+			logfFunc:         testLogger.Warnf,
+			logLevel:         LevelWarn,
+			expectedLogLevel: "warning",
+		},
+		"level fatal": {
+			logFunc:          testLogger.Fatal,
+			logfFunc:         testLogger.Fatalf,
+			logLevel:         LevelFatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			exitCount := 0
+			// prevent .Fatal() from shutting down test runner, and also count times it happened
+			testLogger.logrusLogger.ExitFunc = func(int) {
+				exitCount++
+			}
+
+			// Log using all 4 ways to log at a level
+
+			tc.logFunc("foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+
+			tc.logfFunc("foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+
+			testLogger.Log(tc.logLevel, "foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+
+			testLogger.Logf(tc.logLevel, "foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+
+			// Only LevelFatal should trigger exit
+			if tc.logLevel == LevelFatal {
+				assert.Equal(t, 4, exitCount)
+			} else {
+				assert.Equal(t, 0, exitCount)
+			}
 		})
 	}
 }
