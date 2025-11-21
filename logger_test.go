@@ -171,6 +171,82 @@ func TestLogLevelsInFormatFuncs(t *testing.T) {
 	}
 }
 
+func TestLogLevelsInLogFunc(t *testing.T) {
+	type testCase struct {
+		logLevel         Level
+		expectedLogLevel string
+	}
+	buf := &bytes.Buffer{}
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
+	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
+	testCases := map[string]testCase{
+		"logger.Infof() should log with level info": {
+			logLevel:         LevelInfo,
+			expectedLogLevel: "info",
+		},
+		"logger.Errorf() should log with level error": {
+			logLevel:         LevelError,
+			expectedLogLevel: "error",
+		},
+		"logger.Debugf() should log with level debug": {
+			logLevel:         LevelDebug,
+			expectedLogLevel: "debug",
+		},
+		"logger.Warnf() should log with level warning": {
+			logLevel:         LevelWarn,
+			expectedLogLevel: "warning",
+		},
+		"logger.Fatalf() should log with level fatal": {
+			logLevel:         LevelFatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testLogger.Log(tc.logLevel, "foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+		})
+	}
+}
+
+func TestLogLevelsInLogfFunc(t *testing.T) {
+	type testCase struct {
+		logLevel         Level
+		expectedLogLevel string
+	}
+	buf := &bytes.Buffer{}
+	testLogger := New(WithOutput(buf), WithLevel(LevelDebug))
+	testLogger.logrusLogger.ExitFunc = func(int) {} // prevent .Fatal() from shutting down test runner
+	testCases := map[string]testCase{
+		"logger.Infof() should log with level info": {
+			logLevel:         LevelInfo,
+			expectedLogLevel: "info",
+		},
+		"logger.Errorf() should log with level error": {
+			logLevel:         LevelError,
+			expectedLogLevel: "error",
+		},
+		"logger.Debugf() should log with level debug": {
+			logLevel:         LevelDebug,
+			expectedLogLevel: "debug",
+		},
+		"logger.Warnf() should log with level warning": {
+			logLevel:         LevelWarn,
+			expectedLogLevel: "warning",
+		},
+		"logger.Fatalf() should log with level fatal": {
+			logLevel:         LevelFatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			testLogger.Logf(tc.logLevel, "foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+		})
+	}
+}
+
 func TestLoggingCustomFields(t *testing.T) {
 	type testCase struct {
 		customFieldValue    interface{}
