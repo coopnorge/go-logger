@@ -129,3 +129,13 @@ func (logger *Logger) Fatal(args ...interface{}) {
 func (logger *Logger) Fatalf(format string, args ...interface{}) {
 	logger.entry().Fatalf(format, args...)
 }
+
+// Log forwards a logging call
+func (logger *Logger) Log(level Level, args ...interface{}) {
+	logger.entry().Log(level, args...)
+}
+
+// Logf forwards a logging call
+func (logger *Logger) Logf(level Level, format string, args ...interface{}) {
+	logger.entry().Logf(level, format, args...)
+}
