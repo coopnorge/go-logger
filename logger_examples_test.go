@@ -84,3 +84,42 @@ func ExampleGlobal() {
 	funcThatAcceptsInterface(Global())
 	// Output: {"level":"warning","msg":"foobar","time":"2020-10-10T10:10:10.001Z"}
 }
+
+// warnIfLastAttempt is a helper that demonstrates that you can use a function to provide the appropriate log-level
+// based on data (deliveryCount in this instance)
+func warnIfLastAttempt(deliveryCount int) Level {
+	if deliveryCount < 5 {
+		return LevelInfo
+	}
+	return LevelWarn
+}
+
+func ExampleLogger_Log_firstDelivery() {
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false), WithLevel(LevelInfo))
+
+	logger.Log(warnIfLastAttempt(1), "message delivery count: ", 1)
+	// Output:
+	// {"level":"info","msg":"message delivery count: 1","time":"2020-10-10T10:10:10.001Z"}
+}
+
+func ExampleLogger_Log_thirdDelivery() {
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false), WithLevel(LevelInfo))
+
+	logger.Log(warnIfLastAttempt(3), "message delivery count: ", 3)
+	// Output: {"level":"info","msg":"message delivery count: 3","time":"2020-10-10T10:10:10.001Z"}
+}
+
+func ExampleLogger_Log_lastDelivery() {
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false), WithLevel(LevelInfo))
+
+	logger.Log(warnIfLastAttempt(5), "message delivery count: ", 5)
+	// Output: {"level":"warning","msg":"message delivery count: 5","time":"2020-10-10T10:10:10.001Z"}
+}
+
+func ExampleLogger_Logf() {
+	logger := New(WithNowFunc(mockNowFunc), WithReportCaller(false))
+
+	logger.Logf(LevelWarn, "DeliveryCount is %d; level chosen based on value", 5)
+	// Output:
+	// {"level":"warning","msg":"DeliveryCount is 5; level chosen based on value","time":"2020-10-10T10:10:10.001Z"}
+}

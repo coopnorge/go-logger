@@ -11,7 +11,7 @@ type Level uint8
 
 const (
 	// LevelFatal is to be used to log predictable errors that make the service unusable, eg misconfiguration. After logging, the app will be shut down.
-	LevelFatal = iota
+	LevelFatal Level = iota
 	// LevelError  isto be used for recoverable errors that limit the service's functionality, eg timeouts.
 	LevelError
 	// LevelWarn is to be used for non-critical errors that may require some attention.

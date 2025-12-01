@@ -105,6 +105,102 @@ func TestGlobalLoggerLogLevelsInFormatFuncs(t *testing.T) {
 	}
 }
 
+func TestGlobalLoggerLogLevelsInLogFunc(t *testing.T) {
+	type testCase struct {
+		logLevel         Level
+		expectedLogLevel string
+	}
+
+	buf := &bytes.Buffer{}
+	oldOutput := globalLogger.output
+	oldLevel := globalLogger.level
+	oldExitFunc := globalLogger.logrusLogger.ExitFunc
+	defer func() {
+		// bring global logger to original state after tests
+		ConfigureGlobalLogger(WithOutput(oldOutput), WithLevel(oldLevel))
+		globalLogger.logrusLogger.ExitFunc = oldExitFunc
+	}()
+	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelDebug))
+	globalLogger.logrusLogger.ExitFunc = func(int) {}
+
+	testCases := map[string]testCase{
+		"Info() should log with level info": {
+			logLevel:         LevelInfo,
+			expectedLogLevel: "info",
+		},
+		"Error() should log with level error": {
+			logLevel:         LevelError,
+			expectedLogLevel: "error",
+		},
+		"Debug() should log with level debug": {
+			logLevel:         LevelDebug,
+			expectedLogLevel: "debug",
+		},
+		"Warn() should log with level warning": {
+			logLevel:         LevelWarn,
+			expectedLogLevel: "warning",
+		},
+		"Fatal() should log with level fatal": {
+			logLevel:         LevelFatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			Log(tc.logLevel, "foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+		})
+	}
+}
+
+func TestGlobalLoggerLogLevelsInLogfFunc(t *testing.T) {
+	type testCase struct {
+		logLevel         Level
+		expectedLogLevel string
+	}
+
+	buf := &bytes.Buffer{}
+	oldOutput := globalLogger.output
+	oldLevel := globalLogger.level
+	oldExitFunc := globalLogger.logrusLogger.ExitFunc
+	defer func() {
+		// bring global logger to original state after tests
+		ConfigureGlobalLogger(WithOutput(oldOutput), WithLevel(oldLevel))
+		globalLogger.logrusLogger.ExitFunc = oldExitFunc
+	}()
+	ConfigureGlobalLogger(WithOutput(buf), WithLevel(LevelDebug))
+	globalLogger.logrusLogger.ExitFunc = func(int) {}
+
+	testCases := map[string]testCase{
+		"Info() should log with level info": {
+			logLevel:         LevelInfo,
+			expectedLogLevel: "info",
+		},
+		"Error() should log with level error": {
+			logLevel:         LevelError,
+			expectedLogLevel: "error",
+		},
+		"Debug() should log with level debug": {
+			logLevel:         LevelDebug,
+			expectedLogLevel: "debug",
+		},
+		"Warn() should log with level warning": {
+			logLevel:         LevelWarn,
+			expectedLogLevel: "warning",
+		},
+		"Fatal() should log with level fatal": {
+			logLevel:         LevelFatal,
+			expectedLogLevel: "fatal",
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(t *testing.T) {
+			Logf(tc.logLevel, "foobar")
+			assertLogEntryContains(t, buf, "level", tc.expectedLogLevel)
+		})
+	}
+}
+
 func TestGlobalLoggerConvenienveFunctions(t *testing.T) {
 	buf := &bytes.Buffer{}
 	oldOutput := globalLogger.output
