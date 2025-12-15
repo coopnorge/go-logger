@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/coopnorge/mage v0.16.8
 	github.com/glebarez/sqlite v1.11.0
-	github.com/go-kratos/kratos/v2 v2.9.1
+	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/labstack/gommon v0.4.2
 	github.com/pressly/goose/v3 v3.26.0
 	github.com/sirupsen/logrus v1.9.3
