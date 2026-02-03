@@ -3,7 +3,7 @@ module github.com/coopnorge/go-logger
 go 1.25.0
 
 require (
-	github.com/coopnorge/mage v0.20.2
+	github.com/coopnorge/mage v0.22.4
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/labstack/gommon v0.4.2
@@ -19,6 +19,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/hashicorp/go-version v1.8.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/kr/text v0.2.0 // indirect
