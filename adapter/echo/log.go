@@ -87,12 +87,12 @@ func (wel *WrappedEchoLogger) SetLevel(v echo.Lvl) {
 func (wel *WrappedEchoLogger) SetHeader(_ string) {}
 
 // Print logs at the info level
-func (wel *WrappedEchoLogger) Print(i ...interface{}) {
+func (wel *WrappedEchoLogger) Print(i ...any) {
 	wel.log.Info(i...)
 }
 
 // Printf logs formatted output at the info level
-func (wel *WrappedEchoLogger) Printf(format string, args ...interface{}) {
+func (wel *WrappedEchoLogger) Printf(format string, args ...any) {
 	wel.log.Infof(format, args...)
 }
 
@@ -102,12 +102,12 @@ func (wel *WrappedEchoLogger) Printj(j echo.JSON) {
 }
 
 // Debug logs at the debug level
-func (wel *WrappedEchoLogger) Debug(i ...interface{}) {
+func (wel *WrappedEchoLogger) Debug(i ...any) {
 	wel.log.Debug(i...)
 }
 
 // Debugf logs formatted output at the debug level
-func (wel *WrappedEchoLogger) Debugf(format string, args ...interface{}) {
+func (wel *WrappedEchoLogger) Debugf(format string, args ...any) {
 	wel.log.Debugf(format, args...)
 }
 
@@ -117,12 +117,12 @@ func (wel *WrappedEchoLogger) Debugj(j echo.JSON) {
 }
 
 // Info logs at the info level
-func (wel *WrappedEchoLogger) Info(i ...interface{}) {
+func (wel *WrappedEchoLogger) Info(i ...any) {
 	wel.log.Info(i...)
 }
 
 // Infof logs formatted output at the info level
-func (wel *WrappedEchoLogger) Infof(format string, args ...interface{}) {
+func (wel *WrappedEchoLogger) Infof(format string, args ...any) {
 	wel.log.Infof(format, args...)
 }
 
@@ -132,12 +132,12 @@ func (wel *WrappedEchoLogger) Infoj(j echo.JSON) {
 }
 
 // Warn logs at the warn level
-func (wel *WrappedEchoLogger) Warn(i ...interface{}) {
+func (wel *WrappedEchoLogger) Warn(i ...any) {
 	wel.log.Warn(i...)
 }
 
 // Warnf logs formatted output at the warn level
-func (wel *WrappedEchoLogger) Warnf(format string, args ...interface{}) {
+func (wel *WrappedEchoLogger) Warnf(format string, args ...any) {
 	wel.log.Warnf(format, args...)
 }
 
@@ -147,12 +147,12 @@ func (wel *WrappedEchoLogger) Warnj(j echo.JSON) {
 }
 
 // Error logs at the error level
-func (wel *WrappedEchoLogger) Error(i ...interface{}) {
+func (wel *WrappedEchoLogger) Error(i ...any) {
 	wel.log.Error(i...)
 }
 
 // Errorf logs formatted output at the error level
-func (wel *WrappedEchoLogger) Errorf(format string, args ...interface{}) {
+func (wel *WrappedEchoLogger) Errorf(format string, args ...any) {
 	wel.log.Errorf(format, args...)
 }
 
@@ -162,12 +162,12 @@ func (wel *WrappedEchoLogger) Errorj(j echo.JSON) {
 }
 
 // Fatal logs fatally
-func (wel *WrappedEchoLogger) Fatal(i ...interface{}) {
+func (wel *WrappedEchoLogger) Fatal(i ...any) {
 	wel.log.Fatal(i...)
 }
 
 // Fatalf logs formatted output fatally
-func (wel *WrappedEchoLogger) Fatalf(format string, args ...interface{}) {
+func (wel *WrappedEchoLogger) Fatalf(format string, args ...any) {
 	wel.log.Fatalf(format, args...)
 }
 
@@ -177,12 +177,12 @@ func (wel *WrappedEchoLogger) Fatalj(j echo.JSON) {
 }
 
 // Panic wraps a call to Fatal
-func (wel *WrappedEchoLogger) Panic(i ...interface{}) {
+func (wel *WrappedEchoLogger) Panic(i ...any) {
 	wel.log.Fatal(i...)
 }
 
 // Panicf wraps a call to Fatalf
-func (wel *WrappedEchoLogger) Panicf(format string, args ...interface{}) {
+func (wel *WrappedEchoLogger) Panicf(format string, args ...any) {
 	wel.log.Fatalf(format, args...)
 }
 

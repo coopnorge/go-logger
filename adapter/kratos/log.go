@@ -43,7 +43,7 @@ func NewLoggerKratosAdapter(coopLog *coopLog.Logger) *LoggerKratosAdapter {
 // {"file":"/project/internal/pkg/logs/kratos.go:36","function":"xxx","level":"debug","msg":"msgconfig loaded: MY_ENV format: ","time":"2000-03-08T10:49:12Z"}
 //
 // {"file":"/project/internal/pkg/logs/kratos.go:34","function":"xxx","level":"info","msg":"I'm godoc example message","time":"2000-03-08T10:49:12Z"}
-func (l *LoggerKratosAdapter) Log(level log.Level, keyValPairs ...interface{}) error {
+func (l *LoggerKratosAdapter) Log(level log.Level, keyValPairs ...any) error {
 	if len(keyValPairs) == 0 {
 		return nil
 	}

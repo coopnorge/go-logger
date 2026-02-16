@@ -66,7 +66,7 @@ func ExampleWithError() {
 }
 
 type warner interface {
-	Warn(args ...interface{})
+	Warn(args ...any)
 }
 
 func funcThatAcceptsInterface(warner warner) {

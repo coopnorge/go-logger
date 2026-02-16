@@ -23,7 +23,7 @@ func WithError(err error) *Entry {
 }
 
 // WithField creates log entry using global logger
-func WithField(key string, value interface{}) *Entry {
+func WithField(key string, value any) *Entry {
 	return globalLogger.WithField(key, value)
 }
 
@@ -38,62 +38,62 @@ func WithContext(ctx context.Context) *Entry {
 }
 
 // Info uses global logger to log payload on "info" level
-func Info(args ...interface{}) {
+func Info(args ...any) {
 	globalLogger.Info(args...)
 }
 
 // Infof uses global logger to log payload on "info" level
-func Infof(format string, args ...interface{}) {
+func Infof(format string, args ...any) {
 	globalLogger.Infof(format, args...)
 }
 
 // Error uses global logger to log payload on "error" level
-func Error(args ...interface{}) {
+func Error(args ...any) {
 	globalLogger.Error(args...)
 }
 
 // Errorf uses global logger to log payload on "error" level
-func Errorf(format string, args ...interface{}) {
+func Errorf(format string, args ...any) {
 	globalLogger.Errorf(format, args...)
 }
 
 // Debug uses global logger to log payload on "debug" level
-func Debug(args ...interface{}) {
+func Debug(args ...any) {
 	globalLogger.Debug(args...)
 }
 
 // Debugf uses global logger to log payload on "debug" level
-func Debugf(format string, args ...interface{}) {
+func Debugf(format string, args ...any) {
 	globalLogger.Debugf(format, args...)
 }
 
 // Warn uses global logger to log payload on "warn" level
-func Warn(args ...interface{}) {
+func Warn(args ...any) {
 	globalLogger.Warn(args...)
 }
 
 // Warnf uses global logger to log payload on "warn" level
-func Warnf(format string, args ...interface{}) {
+func Warnf(format string, args ...any) {
 	globalLogger.Warnf(format, args...)
 }
 
 // Fatal uses global logger to log payload on "fatal" level
-func Fatal(args ...interface{}) {
+func Fatal(args ...any) {
 	globalLogger.Fatal(args...)
 }
 
 // Fatalf uses global logger to log payload on "fatal" level
-func Fatalf(format string, args ...interface{}) {
+func Fatalf(format string, args ...any) {
 	globalLogger.Fatalf(format, args...)
 }
 
 // Log uses global logger to log payload on the level of the first parameter
-func Log(level Level, args ...interface{}) {
+func Log(level Level, args ...any) {
 	globalLogger.Log(level, args...)
 }
 
 // Logf uses global logger to log payload on the level of the first parameter
-func Logf(level Level, format string, args ...interface{}) {
+func Logf(level Level, format string, args ...any) {
 	globalLogger.Logf(level, format, args...)
 }
 
