@@ -10,7 +10,7 @@ import (
 )
 
 // Fields type, used to pass to `WithFields`.
-type Fields map[string]interface{}
+type Fields map[string]any
 
 // NowFunc is a typedef for a function which returns the current time
 type NowFunc func() time.Time
@@ -61,7 +61,7 @@ func (logger *Logger) WithError(err error) *Entry {
 }
 
 // WithField forwards a logging call with a field
-func (logger *Logger) WithField(key string, value interface{}) *Entry {
+func (logger *Logger) WithField(key string, value any) *Entry {
 	return logger.entry().WithField(key, value)
 }
 
@@ -81,61 +81,61 @@ func (logger *Logger) OutputHandler() io.Writer {
 }
 
 // Info forwards a logging call in the (format, args) format
-func (logger *Logger) Info(args ...interface{}) {
+func (logger *Logger) Info(args ...any) {
 	logger.entry().Info(args...)
 }
 
 // Infof forwards a logging call in the (format, args) format
-func (logger *Logger) Infof(format string, args ...interface{}) {
+func (logger *Logger) Infof(format string, args ...any) {
 	logger.entry().Infof(format, args...)
 }
 
 // Error forwards an error logging call
-func (logger *Logger) Error(args ...interface{}) {
+func (logger *Logger) Error(args ...any) {
 	logger.entry().Error(args...)
 }
 
 // Errorf forwards an error logging call
-func (logger *Logger) Errorf(format string, args ...interface{}) {
+func (logger *Logger) Errorf(format string, args ...any) {
 	logger.entry().Errorf(format, args...)
 }
 
 // Debug forwards a debugging logging call
-func (logger *Logger) Debug(args ...interface{}) {
+func (logger *Logger) Debug(args ...any) {
 	logger.entry().Debug(args...)
 }
 
 // Debugf forwards a debugging logging call
-func (logger *Logger) Debugf(format string, args ...interface{}) {
+func (logger *Logger) Debugf(format string, args ...any) {
 	logger.entry().Debugf(format, args...)
 }
 
 // Warn forwards a warning logging call
-func (logger *Logger) Warn(args ...interface{}) {
+func (logger *Logger) Warn(args ...any) {
 	logger.entry().Warn(args...)
 }
 
 // Warnf forwards a warning logging call
-func (logger *Logger) Warnf(format string, args ...interface{}) {
+func (logger *Logger) Warnf(format string, args ...any) {
 	logger.entry().Warnf(format, args...)
 }
 
 // Fatal forwards a fatal logging call
-func (logger *Logger) Fatal(args ...interface{}) {
+func (logger *Logger) Fatal(args ...any) {
 	logger.entry().Fatal(args...)
 }
 
 // Fatalf forwards a fatal logging call
-func (logger *Logger) Fatalf(format string, args ...interface{}) {
+func (logger *Logger) Fatalf(format string, args ...any) {
 	logger.entry().Fatalf(format, args...)
 }
 
 // Log forwards a logging call
-func (logger *Logger) Log(level Level, args ...interface{}) {
+func (logger *Logger) Log(level Level, args ...any) {
 	logger.entry().Log(level, args...)
 }
 
 // Logf forwards a logging call
-func (logger *Logger) Logf(level Level, format string, args ...interface{}) {
+func (logger *Logger) Logf(level Level, format string, args ...any) {
 	logger.entry().Logf(level, format, args...)
 }

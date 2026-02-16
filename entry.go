@@ -3,6 +3,7 @@ package logger
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/sirupsen/logrus"
 )
@@ -20,7 +21,7 @@ func (e *Entry) WithError(err error) *Entry {
 }
 
 // WithField forwards a logging call with a field
-func (e *Entry) WithField(key string, value interface{}) *Entry {
+func (e *Entry) WithField(key string, value any) *Entry {
 	return e.WithFields(Fields{key: value})
 }
 
@@ -29,13 +30,9 @@ func (e *Entry) WithFields(fields Fields) *Entry {
 	// Make a copy, to prevent mutation of the old entry
 	newFields := make(Fields, len(e.fields)+len(fields))
 	// Copy old fields
-	for k, v := range e.fields {
-		newFields[k] = v
-	}
+	maps.Copy(newFields, e.fields)
 	// Set new fields
-	for k, v := range fields {
-		newFields[k] = v
-	}
+	maps.Copy(newFields, fields)
 	return &Entry{logger: e.logger, fields: newFields, context: e.context}
 }
 
@@ -54,52 +51,52 @@ func addCallerFields(logrusFields logrus.Fields, reportCaller bool) {
 }
 
 // Info forwards a logging call in the (format, args) format
-func (e *Entry) Info(args ...interface{}) {
+func (e *Entry) Info(args ...any) {
 	e.Log(LevelInfo, args...)
 }
 
 // Infof forwards a logging call in the (format, args) format
-func (e *Entry) Infof(format string, args ...interface{}) {
+func (e *Entry) Infof(format string, args ...any) {
 	e.Logf(LevelInfo, format, args...)
 }
 
 // Error forwards an error logging call
-func (e *Entry) Error(args ...interface{}) {
+func (e *Entry) Error(args ...any) {
 	e.Log(LevelError, args...)
 }
 
 // Errorf forwards an error logging call
-func (e *Entry) Errorf(format string, args ...interface{}) {
+func (e *Entry) Errorf(format string, args ...any) {
 	e.Logf(LevelError, format, args...)
 }
 
 // Debug forwards a debugging logging call
-func (e *Entry) Debug(args ...interface{}) {
+func (e *Entry) Debug(args ...any) {
 	e.Log(LevelDebug, args...)
 }
 
 // Debugf forwards a debugging logging call
-func (e *Entry) Debugf(format string, args ...interface{}) {
+func (e *Entry) Debugf(format string, args ...any) {
 	e.Logf(LevelDebug, format, args...)
 }
 
 // Warn forwards a warning logging call
-func (e *Entry) Warn(args ...interface{}) {
+func (e *Entry) Warn(args ...any) {
 	e.Log(LevelWarn, args...)
 }
 
 // Warnf forwards a warning logging call
-func (e *Entry) Warnf(format string, args ...interface{}) {
+func (e *Entry) Warnf(format string, args ...any) {
 	e.Logf(LevelWarn, format, args...)
 }
 
 // Fatal forwards a fatal logging call
-func (e *Entry) Fatal(args ...interface{}) {
+func (e *Entry) Fatal(args ...any) {
 	e.Log(LevelFatal, args...)
 }
 
 // Fatalf forwards a fatal logging call
-func (e *Entry) Fatalf(format string, args ...interface{}) {
+func (e *Entry) Fatalf(format string, args ...any) {
 	e.Logf(LevelFatal, format, args...)
 }
 

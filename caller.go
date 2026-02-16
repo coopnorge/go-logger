@@ -34,7 +34,7 @@ func getCaller() *runtime.Frame {
 		_ = runtime.Callers(0, pcs)
 
 		// dynamic get the package name and the minimum caller depth
-		for i := 0; i < maximumCallerDepth; i++ {
+		for i := range maximumCallerDepth {
 			funcName := runtime.FuncForPC(pcs[i]).Name()
 			if strings.Contains(funcName, "getCaller") {
 				goLoggerPackage = getPackageName(funcName)

@@ -11,7 +11,7 @@ import (
 
 func TestGlobalLoggerLogLevels(t *testing.T) {
 	type testCase struct {
-		logFunc          func(args ...interface{})
+		logFunc          func(args ...any)
 		expectedLogLevel string
 	}
 
@@ -59,7 +59,7 @@ func TestGlobalLoggerLogLevels(t *testing.T) {
 
 func TestGlobalLoggerLogLevelsInFormatFuncs(t *testing.T) {
 	type testCase struct {
-		logFunc          func(format string, args ...interface{})
+		logFunc          func(format string, args ...any)
 		expectedLogLevel string
 	}
 

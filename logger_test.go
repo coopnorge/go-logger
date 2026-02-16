@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -16,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expectedValue interface{}) {
+func assertLogEntryContains(t *testing.T, logReader io.Reader, key string, expectedValue any) {
 	t.Helper()
 	log := decodeLogToMap(t, logReader)
 	v, ok := log[key]
@@ -86,8 +87,8 @@ func assertLogEntryDoesNotHaveKey(t *testing.T, logReader io.Reader, key string)
 	}
 }
 
-func decodeLogToMap(t *testing.T, logReader io.Reader) map[string]interface{} {
-	log := make(map[string]interface{})
+func decodeLogToMap(t *testing.T, logReader io.Reader) map[string]any {
+	log := make(map[string]any)
 	err := json.NewDecoder(logReader).Decode(&log)
 	if err != nil {
 		t.Fatalf("cannot decode log entry: %v", err)
@@ -98,7 +99,7 @@ func decodeLogToMap(t *testing.T, logReader io.Reader) map[string]interface{} {
 
 func TestLogLevels(t *testing.T) {
 	type testCase struct {
-		logFunc          func(args ...interface{})
+		logFunc          func(args ...any)
 		expectedLogLevel string
 	}
 	buf := &bytes.Buffer{}
@@ -136,7 +137,7 @@ func TestLogLevels(t *testing.T) {
 
 func TestLogLevelsInFormatFuncs(t *testing.T) {
 	type testCase struct {
-		logFunc          func(format string, args ...interface{})
+		logFunc          func(format string, args ...any)
 		expectedLogLevel string
 	}
 	buf := &bytes.Buffer{}
@@ -250,8 +251,8 @@ func TestLogLevelsInLogfFunc(t *testing.T) {
 
 func TestLoggingCustomFields(t *testing.T) {
 	type testCase struct {
-		customFieldValue    interface{}
-		expectedLoggedValue interface{}
+		customFieldValue    any
+		expectedLoggedValue any
 	}
 	testCases := map[string]testCase{
 		"string": {
@@ -303,12 +304,7 @@ func TestLoggingCustomFields(t *testing.T) {
 }
 
 func contains(levels []Level, level Level) bool {
-	for _, l := range levels {
-		if l == level {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(levels, level)
 }
 
 func wasLogged(t *testing.T, logReader io.Reader) bool {
@@ -643,8 +639,8 @@ func TestTimeFormat(t *testing.T) {
 
 func TestOnlyFatalExits(t *testing.T) {
 	type testCase struct {
-		logFunc          func(args ...interface{})
-		logfFunc         func(format string, args ...interface{})
+		logFunc          func(args ...any)
+		logfFunc         func(format string, args ...any)
 		logLevel         Level
 		expectedLogLevel string
 	}
