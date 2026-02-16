@@ -4,8 +4,8 @@ This Go package is used to offer a unified logging interface among projects.
 
 ## Documentation
 
-There usage documentation in [docs](docs/). Development documentation is in
-this file.
+There usage documentation in [docs](docs/). Development documentation is in this
+file.
 
 ## Development workflow
 
@@ -22,7 +22,6 @@ The source code is build using `mage`.
    go install tool
    ```
 
-
 ### Validate
 
 ```bash
@@ -33,25 +32,6 @@ go tool mage validate
 
 ```bash
 go tool mage -l
-```
-
-
-## Mocks
-
-To generate or update mocks use
-[`gomockhandler`](https://github.com/sanposhiho/gomockhandler). `gomockhandler`
-is provided by `golang-devtools`.
-
-### Check mocks
-
-```bash
-docker compose run --rm golang-devtools gomockhandler -config ./gomockhandler.json check
-```
-
-### Generate / Update mocks
-
-```bash
-docker compose run --rm golang-devtools gomockhandler -config ./gomockhandler.json mockgen
 ```
 
 ## User documentation
@@ -65,8 +45,8 @@ To list the commands available for the TechDocs image:
 docker compose run --rm help
 ```
 
-For more information see the [TechDocs Engineering
-Image](https://github.com/coopnorge/engineering-docker-images/tree/main/images/techdocs).
+For more information see the
+[TechDocs Engineering Image](https://github.com/coopnorge/engineering-docker-images/tree/main/images/techdocs).
 
 ### Documentation validation
 
