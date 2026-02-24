@@ -3,7 +3,7 @@ module github.com/coopnorge/go-logger
 go 1.26.0
 
 require (
-	github.com/coopnorge/mage v0.23.2
+	github.com/coopnorge/mage v0.23.3
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/labstack/gommon v0.4.2
