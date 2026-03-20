@@ -1,7 +1,7 @@
 github.com/bmatcuk/doublestar/v4 v4.10.0 h1:zU9WiOla1YA122oLM6i4EXvGW62DvKZVxIe6TYWexEs=
 github.com/bmatcuk/doublestar/v4 v4.10.0/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
-github.com/coopnorge/mage v0.26.0 h1:9pxaenHMneEq/4+bC7p1Wc11njJQt91b1hwvdaUnjek=
-github.com/coopnorge/mage v0.26.0/go.mod h1:2IeFwVRmSpTV+yg2TR2eKDXyCgD40zJhGhinVnhj9fc=
+github.com/coopnorge/mage v0.26.1 h1:XWUVL9sx71DkEfB4SBG6dZITaoj89dJTRi3p2y+27cU=
+github.com/coopnorge/mage v0.26.1/go.mod h1:2IeFwVRmSpTV+yg2TR2eKDXyCgD40zJhGhinVnhj9fc=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
