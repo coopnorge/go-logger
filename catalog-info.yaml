@@ -2,6 +2,17 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: go-logger
+  description: >-
+    Standard structured logging library for all Go services at Coop. Outputs
+    JSON with log level, file, function and timestamp by default. Integrates
+    with go-datadog-lib for trace-correlated log entries.
+  tags:
+    - go
+    - logging
+    - observability
+    - gorm
+    - kratos
+    - goose
   annotations:
     github.com/project-slug: coopnorge/go-logger
     backstage.io/techdocs-ref: dir:.
