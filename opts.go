@@ -61,12 +61,18 @@ func WithReportCaller(enable bool) LoggerOption {
 
 // WithHookFunc allows for connecting a hook to the logger, which will be triggered on all log-entries.
 func WithHookFunc(hook HookFunc) LoggerOption {
+	if hook == nil {
+		return WithHook(nil)
+	}
 	return WithHook(hook)
 }
 
 // WithHook allows for connecting a hook to the logger, which will be triggered on all log-entries.
 func WithHook(hook Hook) LoggerOption {
 	return LoggerOptionFunc(func(l *Logger) {
+		if hook == nil {
+			return
+		}
 		l.logrusLogger.Hooks.Add(&logrusHook{hook: hook})
 	})
 }
