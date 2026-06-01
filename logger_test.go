@@ -506,6 +506,22 @@ func TestHookWithoutContext(t *testing.T) {
 	assertLogEntryDoesNotHaveKey(t, tee, "my-custom-log-key")
 }
 
+func TestNilHook(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New(WithOutput(buf), WithHook(nil))
+	assert.NotPanics(t, func() {
+		logger.Error("foobar")
+	})
+}
+
+func TestNilHookFunc(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := New(WithOutput(buf), WithHookFunc(nil))
+	assert.NotPanics(t, func() {
+		logger.Error("foobar")
+	})
+}
+
 func TestReuseEntry(t *testing.T) {
 	builder := &strings.Builder{}
 	logger := New(WithOutput(builder), WithLevel(LevelInfo))
