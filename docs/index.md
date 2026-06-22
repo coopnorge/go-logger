@@ -182,7 +182,8 @@ type Hook interface {
 type HookFunc func(*HookEntry) (changed bool, err error)
 ```
 
-The struct `logger.HookEntry` contains the fields provided for mutation in a Hook.
+The struct `logger.HookEntry` contains the fields provided for mutation in a
+Hook.
 
 A typical use case for a Hook is to extract data from the `context.Context` set
 by the user using `logger.WithContext(ctx context.Context)`. The data in the
@@ -230,7 +231,7 @@ package main
 import (
 	"github.com/coopnorge/app/userhook"
 
-	"github.com/coopnorge/go-datadog-lib/v2/tracelogger"
+	"github.com/coopnorge/go-telemetry-lib/loghook"
 	"github.com/coopnorge/go-logger"
 )
 
@@ -238,6 +239,7 @@ func main() {
 	ctx := context.Background()
 	logger.ConfigureGlobalLogger(
 		logger.WithHook(userhook.NewHook()),
+		logger.WithHook(loghook.NewHook()),
 	)
 	a(ctx)
 }
@@ -257,7 +259,6 @@ func b(ctx context.Context) {
 
 ### Known Hooks
 
-- `github.com/coopnorge/go-datadog-lib/tracelogger.DDContextLogHook`
-  relates-log entries inside of a Datadog span to that span. Documentation:
-  [Inventory](https://inventory.internal.coop/docs/default/component/go-datadog-lib/#datadog-context-log-hook),
-  [GitHub](https://github.com/coopnorge/go-datadog-lib/blob/main/docs/index.md#datadog-context-log-hook)
+- `github.com/coopnorge/go-telemetry-lib/loghook.Hook`: relates log entries to a
+  span by using `context.Context`.
+  [Documentation](https://inventory.internal.coop/docs/default/component/go-telemetry-lib/getting-started/#step-2-configure-the-log-hook-required)
