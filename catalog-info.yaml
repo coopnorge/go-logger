@@ -5,7 +5,7 @@ metadata:
   description: >-
     Standard structured logging library for all Go services at Coop. Outputs
     JSON with log level, file, function and timestamp by default. Integrates
-    with go-datadog-lib for trace-correlated log entries.
+    with go-telemetry-lib for trace-correlated log entries.
   tags:
     - go
     - logging
