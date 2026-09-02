@@ -458,12 +458,12 @@ func unique[T comparable](slice []T) []T {
 }
 
 func TestDisableReportingCaller(t *testing.T) {
-	buf := &bytes.Buffer{}
-	tee := io.TeeReader(buf, buf)
+	buf := &strings.Builder{}
 	logger := New(WithOutput(buf), WithReportCaller(false))
 	logger.Error("foobar")
-	assertLogEntryDoesNotHaveKey(t, tee, "file")
-	assertLogEntryDoesNotHaveKey(t, tee, "function")
+
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(buf.String()), "file")
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(buf.String()), "function")
 }
 
 type myCtxKey struct{}
