@@ -1,6 +1,6 @@
 module github.com/coopnorge/go-logger
 
-go 1.26.0
+go 1.27.0
 
 require (
 	github.com/coopnorge/mage v0.34.0

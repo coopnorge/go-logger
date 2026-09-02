@@ -1,6 +1,6 @@
 module github.com/coopnorge/go-logger-e2e-tests
 
-go 1.26.0
+go 1.27.0
 
 replace github.com/coopnorge/go-logger => ../
 
