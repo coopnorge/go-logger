@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -309,7 +310,7 @@ func contains(levels []Level, level Level) bool {
 
 func wasLogged(t *testing.T, logReader io.Reader) bool {
 	b, err := io.ReadAll(logReader)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		t.Fatalf("cannot read log entry: %v", err)
 	}
 	return len(b) != 0
