@@ -1,7 +1,7 @@
 github.com/bmatcuk/doublestar/v4 v4.10.0 h1:zU9WiOla1YA122oLM6i4EXvGW62DvKZVxIe6TYWexEs=
 github.com/bmatcuk/doublestar/v4 v4.10.0/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
-github.com/coopnorge/mage v0.34.0 h1:+JZsBKINym2DujQuzpsxw2JtiNtGcSZpvdyQWVnU42U=
-github.com/coopnorge/mage v0.34.0/go.mod h1:ctsB5lCJTa8KwulCBrDgu7eJez809cwPSGmlq7y33rc=
+github.com/coopnorge/mage v0.37.0 h1:OxLwRKmefUPIhlh10n2s5/xoz85sOUvyXreCKRUg3hw=
+github.com/coopnorge/mage v0.37.0/go.mod h1:Rz2E6qbPRpguFn3Tcvw7TQ8fPYu7JQ8DdXUiAiKho3g=
 github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
 github.com/dustin/go-humanize v1.0.1/go.mod h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=
 github.com/glebarez/go-sqlite v1.22.0 h1:uAcMJhaA6r3LHMTFgP0SifzgXg46yJkgxqyuyec+ruQ=
