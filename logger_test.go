@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"regexp"
@@ -309,7 +310,7 @@ func contains(levels []Level, level Level) bool {
 
 func wasLogged(t *testing.T, logReader io.Reader) bool {
 	b, err := io.ReadAll(logReader)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		t.Fatalf("cannot read log entry: %v", err)
 	}
 	return len(b) != 0
@@ -457,12 +458,12 @@ func unique[T comparable](slice []T) []T {
 }
 
 func TestDisableReportingCaller(t *testing.T) {
-	buf := &bytes.Buffer{}
-	tee := io.TeeReader(buf, buf)
+	buf := &strings.Builder{}
 	logger := New(WithOutput(buf), WithReportCaller(false))
 	logger.Error("foobar")
-	assertLogEntryDoesNotHaveKey(t, tee, "file")
-	assertLogEntryDoesNotHaveKey(t, tee, "function")
+
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(buf.String()), "file")
+	assertLogEntryDoesNotHaveKey(t, strings.NewReader(buf.String()), "function")
 }
 
 type myCtxKey struct{}
