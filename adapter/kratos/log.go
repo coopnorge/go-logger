@@ -2,7 +2,7 @@ package logs
 
 import (
 	coopLog "github.com/coopnorge/go-logger"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 // Ensure LoggerKratosAdapter implements the log.Logger interface.
