@@ -21,3 +21,5 @@ jobs:
     secrets: inherit
     with:
       log-level: ${{ inputs.log-level }}
+      post-upgrade-env-vars: |
+        RENOVATE_GITHUB_COM_TOKEN
