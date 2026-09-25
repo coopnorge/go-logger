@@ -1,3 +1,30 @@
 {
-  "extends": ["github>coopnorge/github-workflow-renovate"]
+    extends: ["github>coopnorge/github-workflow-renovate"],
+    packageRules: [
+        {
+            matchManagers: ["gomod"],
+            postUpgradeTasks: {
+                installTools: {
+                    // Install golang before running the postUpgradeTasks commands
+                    golang: {},
+                },
+                commands: [
+                    // Set up Go to fetch coopnorge packages
+                    "sh -c 'git config --global url.https://x-access-token:${RENOVATE_GITHUB_COM_TOKEN}@github.com/.insteadOf https://github.com/'",
+                    // Tidy the root module
+                    "sh -c 'go mod tidy'",
+                    // Tidy the e2e_test module
+                    "sh -c 'cd e2e_test && go mod tidy'",
+                ],
+                // which files should be commited, if they have any changes:
+                fileFilters: [
+                    "go.mod",
+                    "go.sum",
+                    "e2e_test/go.mod",
+                    "e2e_test/go.sum",
+                ],
+                executionMode: "update", // update == run the postUpgradeTasks on every update
+            },
+        },
+    ],
 }
