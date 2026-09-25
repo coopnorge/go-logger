@@ -14,14 +14,14 @@
                     // Tidy the root module
                     "sh -c 'go mod tidy'",
                     // Tidy the e2e_test module
-                    "sh -c 'cd e2e_test && go mod tidy'",
+                    "sh -c 'cd e2e_tests && go mod tidy'",
                 ],
                 // which files should be commited, if they have any changes:
                 fileFilters: [
                     "go.mod",
                     "go.sum",
-                    "e2e_test/go.mod",
-                    "e2e_test/go.sum",
+                    "e2e_tests/go.mod",
+                    "e2e_tests/go.sum",
                 ],
                 executionMode: "update", // update == run the postUpgradeTasks on every update
             },
