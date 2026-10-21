@@ -3,7 +3,7 @@ module github.com/coopnorge/go-logger
 go 1.27.1
 
 require (
-	github.com/coopnorge/mage v0.43.0
+	github.com/coopnorge/mage v0.44.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-kratos/kratos/v2 v2.9.2
 	github.com/labstack/gommon v0.5.0
@@ -34,6 +34,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	golang.org/x/mod v0.42.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
