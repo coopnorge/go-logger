@@ -89,7 +89,52 @@ func main() {
 
 ## Adapters
 
+Adapters are separate Go modules. The core module `github.com/coopnorge/go-logger`
+depends only on Logrus, so an application only downloads the libraries of the
+adapters it uses. Every adapter is released together with the core module and
+has the same version number. Install the adapter at the same version as the core
+module:
+
+```shell
+go get github.com/coopnorge/go-logger@vX.Y.Z
+go get github.com/coopnorge/go-logger/adapter/<name>@vX.Y.Z
+```
+
+The import path of an adapter is `github.com/coopnorge/go-logger/adapter/<name>`.
+When the adapted library has a major version above 1, each major version has its
+own module with a dotted suffix: `adapter/echo.v4` for Echo v4,
+`adapter/goose.v3` for Goose v3 and `adapter/kratos.v2` for Kratos v2. Gorm has
+no major version in its import path, so `adapter/gorm` has no suffix. The
+package names are `echo`, `goose` and `logs`, so set an import alias.
+
+### Echo
+
+```shell
+go get github.com/coopnorge/go-logger/adapter/echo.v4@vX.Y.Z
+```
+
+To ensure that Echo outputs logs in the correct format, set the logger of the
+Echo instance to the wrapped logger.
+
+```go
+package main
+
+import (
+	echoLogger "github.com/coopnorge/go-logger/adapter/echo.v4"
+	"github.com/labstack/echo/v4"
+)
+
+func main() {
+	e := echo.New()
+	e.Logger = echoLogger.NewWrappedEchoLogger()
+}
+```
+
 ### Gorm
+
+```shell
+go get github.com/coopnorge/go-logger/adapter/gorm@vX.Y.Z
+```
 
 To ensure that Gorm outputs logs in the correct format Gorm must be configured
 with a [custom logger](https://gorm.io/docs/logger.html#Customize-Logger).
@@ -120,41 +165,99 @@ func main() {
 
 ### Kratos
 
+```shell
+go get github.com/coopnorge/go-logger/adapter/kratos.v2@vX.Y.Z
+```
+
 To ensure that Kratos outputs logs in the correct format Kratos must be
 configured with a custom logger.
 
 ```go
-	package main
+package main
 
-	import (
-		"github.com/coopnorge/go-logger"
-		"github.com/coopnorge/go-logger/adapter/kratos"
-		"github.com/go-kratos/kratos/v2/log"
-	)
+import (
+	"github.com/coopnorge/go-logger"
+	logs "github.com/coopnorge/go-logger/adapter/kratos.v2"
+	"github.com/go-kratos/kratos/v2/log"
+)
 
-	func main() {
-		log.SetLogger(logs.NewLoggerKratosAdapter(logger.Global()))
-	}
+func main() {
+	log.SetLogger(logs.NewLoggerKratosAdapter(logger.Global()))
+}
 ```
 
 ### Goose
+
+```shell
+go get github.com/coopnorge/go-logger/adapter/goose.v3@vX.Y.Z
+```
 
 To ensure that Goose outputs logs in the correct format, Goose must be
 configured with a custom logger.
 
 ```go
-	package main
+package main
 
-	import (
-        "github.com/coopnorge/go-logger"
-        "github.com/pressly/goose/v3"
-        gooseLogger "github.com/coopnorge/go-logger/adapter/goose"
-	)
+import (
+	"github.com/coopnorge/go-logger"
+	gooseLogger "github.com/coopnorge/go-logger/adapter/goose.v3"
+	"github.com/pressly/goose/v3"
+)
 
-	func main() {
-        goose.SetLogger(gooseLogger.New(logger.Global()))
-	}
+func main() {
+	goose.SetLogger(gooseLogger.New(logger.Global()))
+}
 ```
+
+## Migrating to v0.16.0
+
+Before v0.16.0 the adapters were packages in the core module, so the core
+module pulled in Gorm, Kratos, Goose, Gommon and SQLite for every consumer.
+From v0.16.0 each adapter is its own module and the core module only depends on
+Logrus.
+
+The Echo, Goose and Kratos adapters have new module paths, see below. If your
+application imports the Gorm adapter, run `go get` for it at the same version as
+the core module:
+
+```shell
+go get github.com/coopnorge/go-logger@v0.16.0
+go get github.com/coopnorge/go-logger/adapter/gorm@v0.16.0
+```
+
+Applications that only import `github.com/coopnorge/go-logger` need no change
+and get fewer indirect dependencies. If `go build` reports an ambiguous import
+after the upgrade, the adapter's `go get` is missing.
+
+## Migrating to versioned adapter modules
+
+The Echo, Goose and Kratos adapters moved to modules that match the major
+version of the library they adapt:
+
+| Old import path                                 | New import path                                    |
+| ----------------------------------------------- | -------------------------------------------------- |
+| `github.com/coopnorge/go-logger/adapter/echo`   | `github.com/coopnorge/go-logger/adapter/echo.v4`   |
+| `github.com/coopnorge/go-logger/adapter/goose`  | `github.com/coopnorge/go-logger/adapter/goose.v3`  |
+| `github.com/coopnorge/go-logger/adapter/kratos` | `github.com/coopnorge/go-logger/adapter/kratos.v2` |
+
+The old modules are deprecated. They still work and forward every call to the
+new modules. The package name of `adapter/echo.v4` is `echo`, so alias the
+import when you also import `github.com/labstack/echo/v4`.
+
+To migrate, get the new module and run the `inline` analyzer of `go fix`. It
+rewrites the old imports and calls to the new ones:
+
+```shell
+go get github.com/coopnorge/go-logger/adapter/<name>.vN@vX.Y.Z
+go fix -inline ./...
+go mod tidy
+```
+
+`go mod tidy` drops the deprecated module from your `go.mod` once nothing
+imports it. If the rewrite leaves two imports of the same new path under
+different names, remove one by hand or run `goimports`. Without `go fix`,
+replace the import path and keep the identifiers, which are the same in the new
+modules.
 
 ## Hooks
 

@@ -1,5 +1,7 @@
 {
     extends: ["github>coopnorge/github-workflow-renovate"],
+    // Run `go mod tidy` in every module of the repository.
+    postUpdateOptions: ["gomodTidyAll"],
     packageRules: [
         {
             matchManagers: ["gomod"],
@@ -11,20 +13,25 @@
                 commands: [
                     // Set up Go to fetch coopnorge packages
                     "sh -c 'git config --global url.https://x-access-token:${RENOVATE_GITHUB_COM_TOKEN}@github.com/.insteadOf https://github.com/'",
-                    // Tidy the root module
-                    "sh -c 'go mod tidy'",
-                    // Tidy the e2e_test module
-                    "sh -c 'cd e2e_tests && go mod tidy'",
                 ],
                 // which files should be commited, if they have any changes:
-                fileFilters: [
-                    "go.mod",
-                    "go.sum",
-                    "e2e_tests/go.mod",
-                    "e2e_tests/go.sum",
-                ],
+                fileFilters: ["**/go.mod", "**/go.sum"],
                 executionMode: "update", // update == run the postUpgradeTasks on every update
             },
+        },
+        {
+            // Update each third-party dependency in all modules in one PR.
+            matchManagers: ["gomod"],
+            matchPackageNames: ["!github.com/coopnorge/go-logger"],
+            groupName: "{{{depName}}}",
+        },
+        {
+            // multimod owns the version of the core module in the adapters and
+            // e2e_tests. See RELEASING.md.
+            matchManagers: ["gomod"],
+            matchPackageNames: ["github.com/coopnorge/go-logger"],
+            matchFileNames: ["adapter/**", "e2e_tests/**"],
+            enabled: false,
         },
     ],
 }
