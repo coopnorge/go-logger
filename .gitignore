@@ -66,3 +66,7 @@ cmake-build-*/
 mkdocs.yml
 .vale/
 !.vale/styles/config/vocabularies/General/
+
+# Go workspace files (local development only)
+go.work
+go.work.sum
