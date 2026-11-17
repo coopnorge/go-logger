@@ -2,7 +2,7 @@ package goose_test
 
 import (
 	"github.com/coopnorge/go-logger"
-	gooseLogger "github.com/coopnorge/go-logger/adapter/goose"
+	gooseLogger "github.com/coopnorge/go-logger/adapter/goose.v3"
 	"github.com/pressly/goose/v3"
 )
 

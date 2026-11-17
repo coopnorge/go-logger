@@ -1,0 +1,16 @@
+# Module sets for go.opentelemetry.io/build-tools/multimod.
+# All modules in a set are released with the same version.
+module-sets:
+  go-logger:
+    version: v0.15.10
+    modules:
+      - github.com/coopnorge/go-logger
+      - github.com/coopnorge/go-logger/adapter/echo
+      - github.com/coopnorge/go-logger/adapter/echo.v4
+      - github.com/coopnorge/go-logger/adapter/goose
+      - github.com/coopnorge/go-logger/adapter/goose.v3
+      - github.com/coopnorge/go-logger/adapter/gorm
+      - github.com/coopnorge/go-logger/adapter/kratos
+      - github.com/coopnorge/go-logger/adapter/kratos.v2
+excluded-modules:
+  - github.com/coopnorge/go-logger-e2e-tests

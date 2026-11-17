@@ -1,3 +1,6 @@
 struct
 Kratos
 Gorm
+Logrus
+Gommon
+multimod

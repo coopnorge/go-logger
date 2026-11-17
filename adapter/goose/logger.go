@@ -1,27 +1,25 @@
+// Package goose forwards to github.com/coopnorge/go-logger/adapter/goose.v3.
+//
+// Deprecated: use github.com/coopnorge/go-logger/adapter/goose.v3.
 package goose
 
 import (
 	log "github.com/coopnorge/go-logger"
+	goosev3 "github.com/coopnorge/go-logger/adapter/goose.v3"
 )
 
-// Logger is a logging adapter between Goose and go-logger
-type Logger struct {
-	log *log.Logger
-}
+// Logger is a logging adapter between Goose and go-logger.
+//
+// Deprecated: use github.com/coopnorge/go-logger/adapter/goose.v3.Logger.
+//
+//go:fix inline
+type Logger = goosev3.Logger
 
-// New creates a new GooseLogger instance
-func New(logger *log.Logger) *Logger {
-	return &Logger{
-		log: logger,
-	}
-}
-
-// Printf writes info level statements to the log (goose Logger interface).
-func (l *Logger) Printf(format string, v ...any) {
-	l.log.Infof(format, v...)
-}
-
-// Fatalf writes fatal level statements to the log (goose Logger interface).
-func (l *Logger) Fatalf(format string, v ...any) {
-	l.log.Fatalf(format, v...)
+// New creates a new Logger instance.
+//
+// Deprecated: use github.com/coopnorge/go-logger/adapter/goose.v3.New.
+//
+//go:fix inline
+func New(logger *log.Logger) *goosev3.Logger {
+	return goosev3.New(logger)
 }
